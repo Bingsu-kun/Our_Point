@@ -34,16 +34,18 @@ public class User {
 
     private final String password;
 
+    private String username;
+
     private final LocalDateTime lastLoginAt;
 
     private final LocalDateTime createdAt;
 
-    public User(String email, String password) {
-        this(null, email, password, null, null);
+    public User(String email, String password, String username) {
+        this(null, email, password, username, null, null);
     }
 
     //validation check
-    public User(Long id, String email, String password, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public User(Long id, String email, String password, String username, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
         checkArgument(
                 email.length() >= 4 && email.length() <= 50,
@@ -51,10 +53,16 @@ public class User {
         );
         checkArgument(password != null, "password must be provided.");
         checkArgument(checkAddress(email), "Invalid email address: " + email);
+        checkArgument(username != null, "username must be provided.");
+        checkArgument(
+                username.length() >= 4 && username.length() <= 20,
+                "address length must be between 4 and 20 characters."
+        );
 
         this.id = id;
         this.email = email;
         this.password = password;
+        this.username = username;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = defaultIfNull(createdAt, now());
     }
@@ -63,5 +71,8 @@ public class User {
     public Optional<LocalDateTime> getLastLoginAt() {
         return ofNullable(lastLoginAt);
     }
+
+    //유저 닉네임(name) 변경
+    public void setUsername(String username) { this.username=username; }
 
 }

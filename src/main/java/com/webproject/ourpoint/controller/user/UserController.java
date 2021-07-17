@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -26,5 +27,8 @@ public class UserController {
     public List<User> getUserList() {
         return userRepository.findAll();
     }
+
+    @GetMapping("/user")
+    public Optional<User> getUser(@RequestBody Long id) { return userRepository.findById(id); }
 
 }
