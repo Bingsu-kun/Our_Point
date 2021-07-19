@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS user (
     user_email VARCHAR(50) NOT NULL,
     user_password VARCHAR(20) NOT NULL,
     user_name VARCHAR(10) NOT NULL,
-    user_role VARCHAR(10) NOT NULL,
     user_last_login DATETIME DEFAULT NULL,
     user_created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP(),
     CONSTRAINT unq_user_email UNIQUE (user_email),

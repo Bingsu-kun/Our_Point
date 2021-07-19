@@ -1,11 +1,13 @@
 package com.webproject.ourpoint.model.user;
 
+import com.webproject.ourpoint.security.Jwt;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -32,20 +34,22 @@ public class User {
 
     private final String email;
 
-    private final String password;
+    private String password;
 
     private String username;
 
-    private final LocalDateTime lastLoginAt;
+    private String role;
+
+    private LocalDateTime lastLoginAt;
 
     private final LocalDateTime createdAt;
 
-    public User(String email, String password, String username) {
-        this(null, email, password, username, null, null);
+    public User(String email, String password, String username, String role) {
+        this(null, email, password, username, role, null, null);
     }
 
     //validation check
-    public User(Long id, String email, String password, String username, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public User(Long id, String email, String password, String username, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
         checkArgument(
                 email.length() >= 4 && email.length() <= 50,
@@ -55,8 +59,8 @@ public class User {
         checkArgument(checkAddress(email), "Invalid email address: " + email);
         checkArgument(username != null, "username must be provided.");
         checkArgument(
-                username.length() >= 4 && username.length() <= 20,
-                "address length must be between 4 and 20 characters."
+                username.length() >= 4 && username.length() <= 10,
+                "address length must be between 4 and 10 characters."
         );
 
         this.id = id;
@@ -75,4 +79,19 @@ public class User {
     //유저 닉네임(name) 변경
     public void setUsername(String username) { this.username=username; }
 
+    //password matching
+    public void login(PasswordEncoder passwordEncoder, String credentials) {
+        if (!passwordEncoder.matches(credentials, password))
+            throw new IllegalArgumentException("Bad credential");
+    }
+
+    //
+    public void afterLoginSuccess() {
+        lastLoginAt = now();
+    }
+
+    public String newApiToken(Jwt jwt, String[] roles) {
+        Jwt.Claims claims = Jwt.Claims.of(id, email, username, roles);
+        return jwt.newToken(claims);
+    }
 }
