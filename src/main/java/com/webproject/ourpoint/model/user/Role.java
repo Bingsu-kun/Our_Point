@@ -2,7 +2,7 @@ package com.webproject.ourpoint.model.user;
 
 public enum Role {
 
-    ADMIN("ROLE_ADMIN"),USER("ROLE_USER");
+    ADMIN("ROLE_ADMIN"),FISHER("ROLE_FISHER"),GOODFISHER("ROLE_GOODFISHER"),GREATFISHER("ROLE_GREATFISHER");
 
     private final String value;
 

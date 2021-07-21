@@ -1,9 +1,9 @@
 package com.webproject.ourpoint.security;
 
 import com.webproject.ourpoint.errors.NotFoundException;
+import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.model.user.Role;
-import com.webproject.ourpoint.model.user.User;
-import com.webproject.ourpoint.service.UserService;
+import com.webproject.ourpoint.service.FisherService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -15,37 +15,25 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 import static org.springframework.security.core.authority.AuthorityUtils.createAuthorityList;
 
-/*
- * {@link org.springframework.security.authentication.ProviderManager#providers} 목록에 포함되 있다.
- * ({@link com.webproject.ourpoint.configurations.WebSecurityConfig#configureAuthentication} 에서 추가됨)
- */
+
 public class JwtAuthenticationProvider implements AuthenticationProvider {
 
   private final Jwt jwt;
 
-  private final UserService userService;
+  private final FisherService fisherService;
 
-  public JwtAuthenticationProvider(Jwt jwt, UserService userService) {
+  public JwtAuthenticationProvider(Jwt jwt, FisherService fisherService) {
     this.jwt = jwt;
-    this.userService = userService;
+    this.fisherService = fisherService;
   }
 
-  /*
-   * {@link org.springframework.security.authentication.ProviderManager#authenticate} 메소드에서 호출된다.
-   *
-   * true 를 리턴하면 현재 Provider 에서 인증 처리를 할 수 있음을 의미한다.
-   * 본 Provider 에서는 {@link JwtAuthenticationToken} 타입의 {@link Authentication} 를 처리할 수 있다.
-   */
+  // true를 리턴하면 Provider에서 인증처리 가능함을 의미. JwtAuthenticationToken 타입처리 가능
   @Override
   public boolean supports(Class<?> authentication) {
     return isAssignable(JwtAuthenticationToken.class, authentication);
   }
 
-  /*
-   * {@link org.springframework.security.authentication.ProviderManager#authenticate} 메소드에서 호출된다.
-   *
-   * null 이 아닌 값을 반환하면 인증 처리가 완료된다.
-   */
+  // 반환 값이 null이 아니면 인증 처리 완료됨.
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     JwtAuthenticationToken authenticationToken = (JwtAuthenticationToken) authentication;
@@ -54,16 +42,14 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
   private Authentication processUserAuthentication(AuthenticationRequest request) {
     try {
-      User user = userService.login(request.getPrincipal(), request.getCredentials());
+      Fisher fisher = fisherService.login(request.getPrincipal(), request.getCredentials());
       JwtAuthenticationToken authenticated =
         // 응답용 Authentication 인스턴스를 생성한다.
         // JwtAuthenticationToken.principal 부분에는 JwtAuthentication 인스턴스가 set 된다.
-        // 로그인 완료 전 JwtAuthenticationToken.principal 부분은 Email 인스턴스가 set 되어 있었다.
-        new JwtAuthenticationToken(new JwtAuthentication(user.getId(), user.getUsername(), user.getEmail()), null, createAuthorityList(Role.USER.value()));
+        new JwtAuthenticationToken(new JwtAuthentication(fisher.getId(), fisher.getUsername(), fisher.getEmail()), null, createAuthorityList(fisher.getRole()));
       // JWT 값을 생성한다.
-      // 권한은 ROLE_USER 를 부여한다.
-      String apiToken = user.newApiToken(jwt, new String[]{Role.USER.value()});
-      authenticated.setDetails(new AuthenticationResult(apiToken, user));
+      String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+      authenticated.setDetails(new AuthenticationResult(apiToken, fisher));
       return authenticated;
     } catch (NotFoundException e) {
       throw new UsernameNotFoundException(e.getMessage());

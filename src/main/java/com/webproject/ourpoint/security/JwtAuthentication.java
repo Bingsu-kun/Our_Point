@@ -1,40 +1,28 @@
 package com.webproject.ourpoint.security;
 
-import com.github.prgrms.social.model.commons.Id;
-import com.github.prgrms.social.model.user.Email;
-import com.github.prgrms.social.model.user.User;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.webproject.ourpoint.model.common.Id;
+import com.webproject.ourpoint.model.user.Fisher;
+import lombok.ToString;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-/**
- * 인증된 사용자를 표현한다.
- */
+@ToString
 public class JwtAuthentication {
 
-  public final Id<User, Long> id;
+  public final Id<Fisher, Long> id;
+
+  public final String email;
 
   public final String name;
 
-  public final Email email;
-
-  JwtAuthentication(Long id, String name, Email email) {
+  JwtAuthentication(Long id, String email, String name) {
     checkArgument(id != null, "id must be provided.");
     checkArgument(name != null, "name must be provided.");
     checkArgument(email != null, "email must be provided.");
 
-    this.id = Id.of(User.class, id);
+    this.id = Id.of(Fisher.class, id);
     this.name = name;
     this.email = email;
-  }
-
-  @Override
-  public String toString() {
-    return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-      .append("id", id)
-      .append("email", email)
-      .toString();
   }
 
 }

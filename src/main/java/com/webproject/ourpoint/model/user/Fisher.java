@@ -1,17 +1,11 @@
 package com.webproject.ourpoint.model.user;
 
 import com.webproject.ourpoint.security.Jwt;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -24,18 +18,21 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @EqualsAndHashCode
 @ToString
 @Builder
-@Entity(name = "user")
-public class User {
+@Entity(name = "fisher")
+@Table(uniqueConstraints = { @UniqueConstraint(name = "unq_fisher_email_and_username", columnNames = {"email","username"})})
+public class Fisher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
     @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 1)
     private final Long id;
 
+    @Column(name = "email")
     private final String email;
 
     private String password;
 
+    @Column(name = "username")
     private String username;
 
     private String role;
@@ -44,12 +41,12 @@ public class User {
 
     private final LocalDateTime createdAt;
 
-    public User(String email, String password, String username, String role) {
-        this(null, email, password, username, role, null, null);
+    public Fisher(String email, String password, String username, String role) {
+        this(null, email, password, username, role, null, now());
     }
 
     //validation check
-    public User(Long id, String email, String password, String username, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public Fisher(Long id, String email, String password, String username, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
         checkArgument(
                 email.length() >= 4 && email.length() <= 50,
@@ -78,18 +75,22 @@ public class User {
 
     //유저 닉네임(name) 변경
     public void setUsername(String username) { this.username=username; }
+    //유저 password 변경
+    public void setPassword(String password) { this.password=password; }
 
     //password matching
     public void login(PasswordEncoder passwordEncoder, String credentials) {
         if (!passwordEncoder.matches(credentials, password))
-            throw new IllegalArgumentException("Bad credential");
+            throw new IllegalArgumentException("비밀번호 불일치");
+        afterLoginSuccess();
     }
 
-    //
+    //lastLoginAt update
     public void afterLoginSuccess() {
         lastLoginAt = now();
     }
 
+    //Token making method
     public String newApiToken(Jwt jwt, String[] roles) {
         Jwt.Claims claims = Jwt.Claims.of(id, email, username, roles);
         return jwt.newToken(claims);

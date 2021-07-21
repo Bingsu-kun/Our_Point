@@ -1,10 +1,9 @@
 package com.webproject.ourpoint.configurations;
 
 
-import com.webproject.ourpoint.model.common.Id;
-import com.webproject.ourpoint.model.user.User;
+import com.webproject.ourpoint.model.user.Role;
 import com.webproject.ourpoint.security.*;
-import com.webproject.ourpoint.service.UserService;
+import com.webproject.ourpoint.service.FisherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,15 +21,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.RegexRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.apache.commons.lang3.math.NumberUtils.toLong;
 
 @Configuration
 @EnableWebSecurity
@@ -71,8 +65,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(Jwt jwt, UserService userService) {
-        return new JwtAuthenticationProvider(jwt, userService);
+    public JwtAuthenticationProvider jwtAuthenticationProvider(Jwt jwt, FisherService fisherService) {
+        return new JwtAuthenticationProvider(jwt, fisherService);
     }
 
     @Bean
@@ -87,27 +81,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public ConnectionBasedVoter connectionBasedVoter() {
-        final String regex = "^/user/(\\d+)/marker/.*$";
-        final Pattern pattern = Pattern.compile(regex);
-        RequestMatcher requiresAuthorizationRequestMatcher = new RegexRequestMatcher(pattern.pattern(), null);
-        return new ConnectionBasedVoter(
-                requiresAuthorizationRequestMatcher,
-                (String url) -> {
-                    /* url에서 targetId를 추출하기 위해 정규식 처리 */
-                    Matcher matcher = pattern.matcher(url);
-                    long id = matcher.matches() ? toLong(matcher.group(1), -1) : -1;
-                    return Id.of(User.class, id);
-                }
-        );
-    }
-
-    @Bean
     public AccessDecisionManager accessDecisionManager() {
         List<AccessDecisionVoter<?>> decisionVoters = new ArrayList<>();
         decisionVoters.add(new WebExpressionVoter());
-        // voter 목록에 connectionBasedVoter 를 추가함
-        decisionVoters.add(connectionBasedVoter());
         // 모든 voter 승인해야 해야함
         return new UnanimousBased(decisionVoters);
     }
@@ -124,6 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling()
                 .accessDeniedHandler(accessDeniedHandler)
                 .authenticationEntryPoint(unauthorizedHandler)
+                .accessDeniedPage("/access-denied")
                 .and()
             .sessionManagement()
                 // JWT 인증을 사용하므로 STATELESS 전략 설정
@@ -131,14 +108,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .authorizeRequests()
                 //TODO - 선행(API확립) API에 맞춰서 antMatchers 작성.
-                //.antMatchers("RESTapi url").permitAll()
-                //.antMatchers("RESTapi url").hasRole(Role.USER.name())
+                .antMatchers("/fisher/join").permitAll()
+                .antMatchers("/fisher/emailExists").permitAll()
+                .antMatchers("/fisher/nameExists").permitAll()
+                .antMatchers("/fisher/me").authenticated()
                 .accessDecisionManager(accessDecisionManager())
                 .anyRequest().permitAll()
+                .and()
+            .logout()
+                .logoutRequestMatcher(new AntPathRequestMatcher("/fisher/logout"))
                 .and()
             // JWT 인증을 사용하므로 form 로그인 비활성
             .formLogin()
                 .disable();
+
         http
         // 필터 체인 변경은 여기서
             .addFilterBefore(jwtAuthenticationTokenFilter(), UsernamePasswordAuthenticationFilter.class);

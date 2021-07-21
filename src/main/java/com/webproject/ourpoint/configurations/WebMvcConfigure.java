@@ -7,7 +7,7 @@ import org.springframework.web.servlet.resource.PathResourceResolver;
 
 public class WebMvcConfigure implements WebMvcConfigurer {
 
-    private final String baseApiPath = "api";
+    private final String baseApiPath = "/";
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -23,9 +23,6 @@ public class WebMvcConfigure implements WebMvcConfigurer {
                 .addResolver(new PathResourceResolver() {
                     @Override
                     protected Resource getResource(String resourcePath, Resource location) {
-                        if (resourcePath.startsWith(baseApiPath) || resourcePath.startsWith(baseApiPath.substring(1))) {
-                            return null;
-                        }
                         return location.exists() && location.isReadable() ? location : null;
                     }
                 });

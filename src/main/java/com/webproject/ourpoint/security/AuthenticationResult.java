@@ -1,6 +1,6 @@
 package com.webproject.ourpoint.security;
 
-import com.webproject.ourpoint.model.user.User;
+import com.webproject.ourpoint.model.user.Fisher;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -10,29 +10,29 @@ public class AuthenticationResult {
 
   private final String apiToken;
 
-  private final User user;
+  private final Fisher fisher;
 
-  public AuthenticationResult(String apiToken, User user) {
+  public AuthenticationResult(String apiToken, Fisher fisher) {
     checkArgument(apiToken != null, "apiToken must be provided.");
-    checkArgument(user != null, "user must be provided.");
+    checkArgument(fisher != null, "user must be provided.");
 
     this.apiToken = apiToken;
-    this.user = user;
+    this.fisher = fisher;
   }
 
   public String getApiToken() {
     return apiToken;
   }
 
-  public User getUser() {
-    return user;
+  public Fisher getUser() {
+    return fisher;
   }
 
   @Override
   public String toString() {
     return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
       .append("apiToken", apiToken)
-      .append("user", user)
+      .append("user", fisher)
       .toString();
   }
 

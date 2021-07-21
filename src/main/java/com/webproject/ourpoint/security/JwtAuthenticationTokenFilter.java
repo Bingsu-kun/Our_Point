@@ -1,6 +1,5 @@
 package com.webproject.ourpoint.security;
 
-import com.github.prgrms.social.model.user.Email;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,8 +15,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,12 +26,9 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-/**
- * HTTP Request-Header 에서 JWT 값을 추출하고, JWT 값이 올바르다면 인증정보 {@link JwtAuthenticationToken}를 생성한다.
- * 생성된 {@link JwtAuthenticationToken} 인스턴스는 {@link SecurityContextHolder}를 통해 Thread-Local 영역에 저장된다.
- * (Thread-Local 이라는 저장 영역을 잘 모르겠다면 구글 검색 Go~ 매우 중요한 부분입니다.)
- *
- * 인증이 완료된  {@link JwtAuthenticationToken#principal}부분 에는 {@link JwtAuthentication} 인스턴스가 set 된다.
+/*
+ * HTTP Request-Header 에서 JWT 값을 추출하고, JWT 값이 올바르다면 인증정보 JwtAuthenticationToken을 생성한다.
+ * 생성된 인스턴스는 SecurityContextHolder} 통해 Thread-Local 영역에 저장된다.
  */
 public class JwtAuthenticationTokenFilter extends GenericFilterBean {
 
@@ -66,14 +62,14 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           log.debug("Jwt parse result: {}", claims);
 
           // 만료 10분 전
-          if (canRefresh(claims, 6000 * 10)) {
+          if (canRefresh(claims)) {
             String refreshedToken = jwt.refreshToken(authorizationToken);
             response.setHeader(headerKey, refreshedToken);
           }
 
           Long userKey = claims.userKey;
           String name = claims.name;
-          Email email = claims.email;
+          String email = claims.email;
 
           List<GrantedAuthority> authorities = obtainAuthorities(claims);
 
@@ -95,11 +91,11 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
     chain.doFilter(request, response);
   }
 
-  private boolean canRefresh(Jwt.Claims claims, long refreshRangeMillis) {
+  private boolean canRefresh(Jwt.Claims claims) {
     long exp = claims.exp();
     if (exp > 0) {
       long remain = exp - System.currentTimeMillis();
-      return remain < refreshRangeMillis;
+      return remain < (long) 60000;
     }
     return false;
   }
@@ -116,16 +112,12 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
     if (token != null) {
       if (log.isDebugEnabled())
         log.debug("Jwt authorization api detected: {}", token);
-      try {
-        token = URLDecoder.decode(token, "UTF-8");
-        String[] parts = token.split(" ");
-        if (parts.length == 2) {
-          String scheme = parts[0];
-          String credentials = parts[1];
-          return BEARER.matcher(scheme).matches() ? credentials : null;
-        }
-      } catch (UnsupportedEncodingException e) {
-        log.error(e.getMessage(), e);
+      token = URLDecoder.decode(token, StandardCharsets.UTF_8);
+      String[] parts = token.split(" ");
+      if (parts.length == 2) {
+        String scheme = parts[0];
+        String credentials = parts[1];
+        return BEARER.matcher(scheme).matches() ? credentials : null;
       }
     }
 

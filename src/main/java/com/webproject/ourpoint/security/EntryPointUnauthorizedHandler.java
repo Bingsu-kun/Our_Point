@@ -1,7 +1,7 @@
 package com.webproject.ourpoint.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.prgrms.social.controller.ApiResult;
+import com.webproject.ourpoint.controller.ApiResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.github.prgrms.social.controller.ApiResult.ERROR;
+import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 
 @Component
 public class EntryPointUnauthorizedHandler implements AuthenticationEntryPoint {
