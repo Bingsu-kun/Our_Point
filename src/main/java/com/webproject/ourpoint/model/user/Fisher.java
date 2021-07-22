@@ -27,14 +27,16 @@ public class Fisher {
     @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 1)
     private final Long id;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private final String email;
 
+    @Column(nullable = false)
     private String password;
 
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String role;
 
     private LocalDateTime lastLoginAt;
@@ -64,6 +66,7 @@ public class Fisher {
         this.email = email;
         this.password = password;
         this.username = username;
+        this.role = role;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = defaultIfNull(createdAt, now());
     }
@@ -77,6 +80,8 @@ public class Fisher {
     public void setUsername(String username) { this.username=username; }
     //유저 password 변경
     public void setPassword(String password) { this.password=password; }
+
+    public void setRole(String role) { this.role=role; }
 
     //password matching
     public void login(PasswordEncoder passwordEncoder, String credentials) {

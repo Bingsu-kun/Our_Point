@@ -107,7 +107,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
             .authorizeRequests()
-                //TODO - 선행(API확립) API에 맞춰서 antMatchers 작성.
+                // API에 맞춰서 antMatchers 작성.
                 .antMatchers("/fisher/join").permitAll()
                 .antMatchers("/fisher/emailExists").permitAll()
                 .antMatchers("/fisher/nameExists").permitAll()

@@ -31,6 +31,8 @@ public class FisherService {
 
     @Transactional
     public Fisher join(String email, String password, String name) {
+        checkArgument(findByEmail(email).isPresent(),"This email already exist.");
+        checkArgument(findByName(name).isPresent(), "This name already exist.");
         checkArgument(isNotEmpty(password), "password must be provided.");
         checkArgument(
                 password.length() >= 6 && password.length() <= 20,
@@ -46,8 +48,6 @@ public class FisherService {
         return fisherRepository.save(fisher);
     }
 
-
-    //TODO - login 어떤 플로우로 쓰이는지 확인.
     @Transactional
     public Fisher login(String email, String password) {
         checkArgument(password != null, "password must be provided.");
@@ -57,6 +57,34 @@ public class FisherService {
         save(fisher);
         return fisher;
     }
+    //TODO - 아래 change 컨트롤러 만들어야됨. 체인지 할 때 비밀번호 다시 요청하는 것도 추가해야됨.
+    @Transactional
+    public Fisher changeName(Id<Fisher,Long> id, String changeName) {
+        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        fisher.setUsername(changeName);
+        save(fisher);
+        return fisher;
+    }
+
+    @Transactional
+    public Fisher changeRole(Id<Fisher,Long> id, String changeRole) {
+        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        fisher.setRole(changeRole);
+        save(fisher);
+        return fisher;
+    }
+
+    @Transactional
+    public Fisher changePassword(Id<Fisher,Long> id, String changePassword) {
+        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        fisher.setPassword(changePassword);
+        save(fisher);
+        return fisher;
+    }
+
+
+
+    //-------------------------아래는 read only 메소드들------------------------------------
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findById(Id<Fisher, Long> userId) {

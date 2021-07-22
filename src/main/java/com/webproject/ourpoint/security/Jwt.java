@@ -35,6 +35,7 @@ public class Jwt {
                 .build();
     }
 
+    //새로운 토큰을 만든다
     public String newToken(Claims claims) {
         Date now = new Date();
         JWTCreator.Builder builder = com.auth0.jwt.JWT.create();
@@ -50,6 +51,7 @@ public class Jwt {
         return builder.sign(algorithm);
     }
 
+    //만료된 또는 만료 직전의 토큰을 리프레쉬한다.
     public String refreshToken(String token) throws JWTVerificationException {
         Claims claims = verify(token);
         claims.eraseIat();

@@ -10,7 +10,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
+import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 
 @RestController
@@ -47,6 +49,14 @@ public class FisherController {
         return OK( new JoinResult(apiToken, new FisherDto(fisher)));
     }
 
+    @GetMapping(path = "/login")
+    public ApiResult<LoginResult> login(@RequestBody LoginRequest loginRequest) {
+        Fisher fisher = fisherService.login(loginRequest.getPrincipal(), loginRequest.getCredentials());
+
+        String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        return OK( new LoginResult(apiToken, new FisherDto(fisher)));
+    }
+
     @GetMapping(path = "/me")
     public ApiResult<FisherDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
         return  OK(
@@ -57,7 +67,6 @@ public class FisherController {
     }
 
     //test
-    // TODO PostgreSQL 어떻게 되먹은거야ㅏㅏㅏㅏㅏ error : 컬럼이 없대. 아마 테이블생성이 제대로 안되는거 같은데?
     @GetMapping(path = "/all")
     public List<Fisher> findAll() {
         return  fisherService.findAll();
