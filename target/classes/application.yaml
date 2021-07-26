@@ -9,12 +9,12 @@ spring:
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
+      ddl-auto: create
 server:
   port: 8080
 jwt:
   token:
-    header: api_key
-    issuer: our_point
+    header: Authorization
+    issuer: Modu_Point
     clientSecret: aa64eb33e4701c204be9ca4b16c488eee31ae31cb561b1f5f50f6c7b63d14cb1
     expirySeconds: 864000000

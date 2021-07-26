@@ -20,7 +20,7 @@ public class FisherDto {
 
     private String email;
 
-    private String name;
+    private String fishername;
 
     private String role;
 

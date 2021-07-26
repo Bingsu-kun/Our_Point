@@ -18,54 +18,50 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @EqualsAndHashCode
 @ToString
 @Builder
+@NoArgsConstructor
 @Entity(name = "fisher")
-@Table(uniqueConstraints = { @UniqueConstraint(name = "unq_fisher_email_and_username", columnNames = {"email","username"})})
+@Table(uniqueConstraints = { @UniqueConstraint(name = "unq_fisher_email_and_username", columnNames = {"email","fishername"})})
 public class Fisher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
     @SequenceGenerator(name = "user_id_seq", sequenceName = "user_id_seq", allocationSize = 1)
-    private final Long id;
+    private Long id;
 
     @Column(name = "email", nullable = false)
-    private final String email;
+    private String email;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "username", nullable = false)
-    private String username;
+    @Column(name = "fishername", nullable = false)
+    private String fishername;
 
     @Column(nullable = false)
     private String role;
 
     private LocalDateTime lastLoginAt;
 
-    private final LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    public Fisher(String email, String password, String username, String role) {
-        this(null, email, password, username, role, null, now());
+    public Fisher(String email, String password, String fishername, String role) {
+        this(null, email, password, fishername, role, null, now());
     }
 
     //validation check
-    public Fisher(Long id, String email, String password, String username, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public Fisher(Long id, String email, String password, String fishername, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
-        checkArgument(
-                email.length() >= 4 && email.length() <= 50,
-                "address length must be between 4 and 50 characters."
-        );
         checkArgument(password != null, "password must be provided.");
-        checkArgument(checkAddress(email), "Invalid email address: " + email);
-        checkArgument(username != null, "username must be provided.");
+        checkArgument(fishername != null, "username must be provided.");
         checkArgument(
-                username.length() >= 4 && username.length() <= 10,
-                "address length must be between 4 and 10 characters."
+                fishername.length() >= 2 && fishername.length() <= 10,
+                "address length must be between 2 and 10 characters."
         );
 
         this.id = id;
         this.email = email;
         this.password = password;
-        this.username = username;
+        this.fishername = fishername;
         this.role = role;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = defaultIfNull(createdAt, now());
@@ -77,17 +73,20 @@ public class Fisher {
     }
 
     //유저 닉네임(name) 변경
-    public void setUsername(String username) { this.username=username; }
+    public void setFishername(String fishername) { this.fishername =fishername; }
     //유저 password 변경
     public void setPassword(String password) { this.password=password; }
 
     public void setRole(String role) { this.role=role; }
 
     //login
-    public void login(PasswordEncoder passwordEncoder, String credentials) {
+    public boolean login(PasswordEncoder passwordEncoder, String credentials) {
         if (!isPasswordMatch(passwordEncoder,credentials))
-            throw new IllegalArgumentException("비밀번호 불일치");
-        afterLoginSuccess();
+            return false;
+        else {
+            afterLoginSuccess();
+            return true;
+        }
     }
 
     //just password matching
@@ -102,7 +101,7 @@ public class Fisher {
 
     //Token making method
     public String newApiToken(Jwt jwt, String[] roles) {
-        Jwt.Claims claims = Jwt.Claims.of(id, email, username, roles);
+        Jwt.Claims claims = Jwt.Claims.of(id, fishername, email, roles);
         return jwt.newToken(claims);
     }
 }

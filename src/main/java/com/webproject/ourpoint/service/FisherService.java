@@ -10,10 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.webproject.ourpoint.utils.EmailFormatValidation.checkAddress;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 
@@ -29,10 +30,19 @@ public class FisherService {
         this.fisherRepository = fisherRepository;
     }
 
+
+    //----------------------------Transactional method--------------------------------
+
+    @Transactional
+    private Fisher save(Fisher fisher) {
+        return fisherRepository.save(fisher);
+    }
+
     @Transactional
     public Fisher join(String email, String password, String name) {
-        checkArgument(findByEmail(email).isPresent(),"This email already exist.");
-        checkArgument(findByName(name).isPresent(), "This name already exist.");
+        checkArgument(findByEmail(email).isEmpty(),"This email already exist.");
+        checkArgument(checkAddress(email), "Invalid email address: " + email);
+        checkArgument(findByName(name).isEmpty(), "This name already exist.");
         checkArgument(isNotEmpty(password), "password must be provided.");
         checkArgument(
                 password.length() >= 6 && password.length() <= 20,
@@ -40,39 +50,56 @@ public class FisherService {
         );
         checkArgument(PasswordValidation.isValidPassword(password), "password validation failed.");
 
-        Fisher fisher = new Fisher(email,passwordEncoder.encode(password), name, Role.FISHER.name());
+        Fisher fisher;
+
+        if (email.equals("icetime963@gmail.com"))
+            fisher = new Fisher(email,passwordEncoder.encode(password),name,Role.ADMIN.name());
+        else
+            fisher = new Fisher(email,passwordEncoder.encode(password), name, Role.FISHER.name());
         return save(fisher);
     }
 
-    private Fisher save(Fisher fisher) {
-        return fisherRepository.save(fisher);
-    }
 
     @Transactional
     public Fisher login(String email, String password) {
         checkArgument(password != null, "password must be provided.");
 
         Fisher fisher = findByEmail(email).orElseThrow(() -> new NotFoundException(Fisher.class, email));
-        fisher.login(passwordEncoder, password);
+        checkArgument(fisher.login(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
         save(fisher);
         return fisher;
     }
-    //TODO - 아래 change 컨트롤러 만들어야됨. 체인지 할 때 비밀번호 다시 요청하는 것도 추가해야됨.
+
     @Transactional
     public Fisher changeName(Id<Fisher,Long> id, String password, String changeName) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
         checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
-        fisher.setUsername(changeName);
+        fisher.setFishername(changeName);
         save(fisher);
         return fisher;
     }
 
     // 이 메소드는 관리자 전용입니다.
     @Transactional
-    public Fisher changeRole(Id<Fisher,Long> id, String password, String changeRole) {
-        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
-        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
-        fisher.setRole(changeRole);
+    public Fisher changeRole(String fishername, String changeRole) {
+        Fisher fisher = findByName(fishername).orElseThrow(() -> new NotFoundException(Fisher.class, fishername));
+
+        Role role;
+
+        if (changeRole.toUpperCase(Locale.ROOT).equals("GOODFISHER")) {
+            role = Role.GOODFISHER;
+        }
+        else if (changeRole.toUpperCase(Locale.ROOT).equals("GREATFISHER")) {
+            role = Role.GREATFISHER;
+        }
+        else if (changeRole.toUpperCase(Locale.ROOT).equals("FISHER")) {
+            role = Role.FISHER;
+        }
+        else {
+            throw new NotFoundException(Role.class, changeRole);
+        }
+
+        fisher.setRole(role.name());
         save(fisher);
         return fisher;
     }
@@ -88,7 +115,7 @@ public class FisherService {
 
 
 
-    //-------------------------아래는 read only 메소드들------------------------------------
+    //-------------------------read only methods------------------------------------
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findById(Id<Fisher, Long> userId) {
@@ -99,6 +126,7 @@ public class FisherService {
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findByEmail(String email) {
+        checkArgument(checkAddress(email), "Invalid email address: " + email);
         checkArgument(email != null, "email must be provided.");
 
         return Optional.ofNullable(fisherRepository.findByEmail(email));
@@ -109,12 +137,6 @@ public class FisherService {
         checkArgument(name != null, "name must be provided.");
 
         return Optional.ofNullable(fisherRepository.findByName(name));
-    }
-
-    //test
-    @Transactional(readOnly = true)
-    public List<Fisher> findAll() {
-        return fisherRepository.findAll();
     }
 
 }

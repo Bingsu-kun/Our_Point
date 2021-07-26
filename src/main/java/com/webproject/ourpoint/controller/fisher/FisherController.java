@@ -9,10 +9,7 @@ import com.webproject.ourpoint.service.FisherService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 
-import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 
 @RestController
@@ -29,13 +26,13 @@ public class FisherController {
     }
 
     @GetMapping(path = "/emailExists")
-    public ApiResult<Boolean> checkEmail(@RequestBody String request) {
-        return OK(fisherService.findByEmail(request).isPresent());
+    public ApiResult<Boolean> checkEmail(@RequestBody ExistRequest existRequest) {
+        return OK(fisherService.findByEmail(existRequest.getRequest()).isPresent());
     }
 
     @GetMapping(path = "/nameExists")
-    public ApiResult<Boolean> checkName(@RequestBody String request) {
-        return OK(fisherService.findByName(request).isPresent());
+    public ApiResult<Boolean> checkName(@RequestBody ExistRequest existRequest) {
+        return OK(fisherService.findByName(existRequest.getRequest()).isPresent());
     }
 
     @PostMapping(path = "/join")
@@ -67,30 +64,24 @@ public class FisherController {
     }
 
     @PostMapping(path = "/changeName")
-    public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+    public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
         return OK(
                 new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
         );
     }
 
     @PostMapping(path = "/changeRole")
-    public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+    public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
         return OK(
-                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+                new FisherDto(fisherService.changeRole( changeRequest.getCredentials(), changeRequest.getChangeValue()))
         );
     }
 
     @PostMapping(path = "/changePassword")
-    public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+    public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
         return OK(
-                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+                new FisherDto(fisherService.changePassword(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
         );
-    }
-
-    //test
-    @GetMapping(path = "/all")
-    public List<Fisher> findAll() {
-        return  fisherService.findAll();
     }
 
 }
