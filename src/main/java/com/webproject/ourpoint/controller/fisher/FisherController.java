@@ -66,6 +66,27 @@ public class FisherController {
         );
     }
 
+    @PostMapping(path = "/changeName")
+    public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+        return OK(
+                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+        );
+    }
+
+    @PostMapping(path = "/changeRole")
+    public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+        return OK(
+                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+        );
+    }
+
+    @PostMapping(path = "/changePassword")
+    public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, ChangeRequest changeRequest) {
+        return OK(
+                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+        );
+    }
+
     //test
     @GetMapping(path = "/all")
     public List<Fisher> findAll() {

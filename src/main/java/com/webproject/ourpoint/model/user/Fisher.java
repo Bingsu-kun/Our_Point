@@ -83,11 +83,16 @@ public class Fisher {
 
     public void setRole(String role) { this.role=role; }
 
-    //password matching
+    //login
     public void login(PasswordEncoder passwordEncoder, String credentials) {
-        if (!passwordEncoder.matches(credentials, password))
+        if (!isPasswordMatch(passwordEncoder,credentials))
             throw new IllegalArgumentException("비밀번호 불일치");
         afterLoginSuccess();
+    }
+
+    //just password matching
+    public boolean isPasswordMatch(PasswordEncoder passwordEncoder, String credentials) {
+        return passwordEncoder.matches(credentials, password);
     }
 
     //lastLoginAt update

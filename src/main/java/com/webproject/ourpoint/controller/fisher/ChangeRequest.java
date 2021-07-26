@@ -7,12 +7,10 @@ import lombok.ToString;
 @ToString
 @Getter
 @NoArgsConstructor
-public class JoinRequest {
-
-    private String principal;
+public class ChangeRequest {
 
     private String credentials;
 
-    private String name;
+    private String changeValue;
 
 }

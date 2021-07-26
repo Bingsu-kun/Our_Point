@@ -59,24 +59,28 @@ public class FisherService {
     }
     //TODO - 아래 change 컨트롤러 만들어야됨. 체인지 할 때 비밀번호 다시 요청하는 것도 추가해야됨.
     @Transactional
-    public Fisher changeName(Id<Fisher,Long> id, String changeName) {
+    public Fisher changeName(Id<Fisher,Long> id, String password, String changeName) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
         fisher.setUsername(changeName);
         save(fisher);
         return fisher;
     }
 
+    // 이 메소드는 관리자 전용입니다.
     @Transactional
-    public Fisher changeRole(Id<Fisher,Long> id, String changeRole) {
+    public Fisher changeRole(Id<Fisher,Long> id, String password, String changeRole) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
         fisher.setRole(changeRole);
         save(fisher);
         return fisher;
     }
 
     @Transactional
-    public Fisher changePassword(Id<Fisher,Long> id, String changePassword) {
+    public Fisher changePassword(Id<Fisher,Long> id, String password, String changePassword) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
         fisher.setPassword(changePassword);
         save(fisher);
         return fisher;
