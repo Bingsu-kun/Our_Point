@@ -95,7 +95,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
     long exp = claims.exp();
     if (exp > 0) {
       long remain = exp - System.currentTimeMillis();
-      return remain < (long) 60000;
+      return remain > (long) 0;
     }
     return false;
   }

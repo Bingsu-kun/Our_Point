@@ -79,9 +79,29 @@ public class FisherService {
         return fisher;
     }
 
+    @Transactional
+    public Fisher changePassword(Id<Fisher,Long> id, String password, String changePassword) {
+        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
+        fisher.setPassword(changePassword);
+        save(fisher);
+        return fisher;
+    }
+
+    @Transactional
+    public void delete(Id<Fisher,Long> id, String email, String password) {
+        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
+        checkArgument(fisher.getEmail().equals(email), "이메일이 일치하지 않습니다.");
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password), "비밀번호가 일치하지 않습니다.");
+        fisherRepository.delete(fisher);
+    }
+
     // 이 메소드는 관리자 전용입니다.
     @Transactional
-    public Fisher changeRole(String fishername, String changeRole) {
+    public Fisher changeRole(Id<Fisher,Long> id, String fishername, String changeRole) {
+        checkArgument(findById(id).orElseThrow(() -> new NotFoundException(Fisher.class,id))
+                .getRole().equals(Role.ADMIN.name()),"관리자가 아닙니다.");
+
         Fisher fisher = findByName(fishername).orElseThrow(() -> new NotFoundException(Fisher.class, fishername));
 
         Role role;
@@ -103,16 +123,6 @@ public class FisherService {
         save(fisher);
         return fisher;
     }
-
-    @Transactional
-    public Fisher changePassword(Id<Fisher,Long> id, String password, String changePassword) {
-        Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
-        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
-        fisher.setPassword(changePassword);
-        save(fisher);
-        return fisher;
-    }
-
 
 
     //-------------------------read only methods------------------------------------
