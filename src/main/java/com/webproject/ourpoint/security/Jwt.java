@@ -19,6 +19,7 @@ public class Jwt {
     //Rel3Bjce2MajBo09qgkNgYaTuzvJe8iwnBFhsDS5
     private final String clientSecret;
 
+    //3600
     private final int expirySeconds;
 
     private final Algorithm algorithm;
@@ -35,14 +36,29 @@ public class Jwt {
                 .build();
     }
 
-    //새로운 토큰을 만든다
-    public String newToken(Claims claims) {
+    //새로운 액세스토큰을 만든다
+    public String newAccessToken(Claims claims) {
         Date now = new Date();
         JWTCreator.Builder builder = com.auth0.jwt.JWT.create();
         builder.withIssuer(issuer);
         builder.withIssuedAt(now);
-        if (expirySeconds > 0) {
-            builder.withExpiresAt(new Date(now.getTime() + expirySeconds * 1_000L));
+        if (expirySeconds > 0) { // 0이면 만료이기 때문에
+            builder.withExpiresAt(new Date(now.getTime() + expirySeconds * 1_000L)); //1000L 곱하므로 1시간
+        }
+        builder.withClaim("userKey", claims.userKey);
+        builder.withClaim("name", claims.name);
+        builder.withClaim("email", claims.email);
+        builder.withArrayClaim("roles", claims.roles);
+        return builder.sign(algorithm);
+    }
+
+    public String newRefreshToken(Claims claims) {
+        Date now = new Date();
+        JWTCreator.Builder builder = com.auth0.jwt.JWT.create();
+        builder.withIssuer(issuer);
+        builder.withIssuedAt(now);
+        if (expirySeconds > 0) { // 0이면 만료이기 때문에
+            builder.withExpiresAt(new Date(now.getTime() + expirySeconds * 1_000L * 24 * 21)); //1000L * 24 * 24 곱하므로 3주
         }
         builder.withClaim("userKey", claims.userKey);
         builder.withClaim("name", claims.name);
@@ -52,11 +68,18 @@ public class Jwt {
     }
 
     //만료된 또는 만료 직전의 토큰을 리프레쉬한다.
-    public String refreshToken(String token) throws JWTVerificationException {
+    public String refreshAccessToken(String token) throws JWTVerificationException {
         Claims claims = verify(token);
         claims.eraseIat();
         claims.eraseExp();
-        return newToken(claims);
+        return newAccessToken(claims);
+    }
+
+    public String refreshRefreshToken(String token) throws JWTVerificationException {
+        Claims claims = verify(token);
+        claims.eraseIat();
+        claims.eraseExp();
+        return newRefreshToken(claims);
     }
 
     public Claims verify(String token) throws JWTVerificationException {

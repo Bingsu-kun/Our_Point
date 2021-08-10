@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.webproject.ourpoint.utils.EmailFormatValidation.checkAddress;
 import static java.time.LocalDateTime.now;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -102,6 +101,6 @@ public class Fisher {
     //Token making method
     public String newApiToken(Jwt jwt, String[] roles) {
         Jwt.Claims claims = Jwt.Claims.of(id, fishername, email, roles);
-        return jwt.newToken(claims);
+        return jwt.newAccessToken(claims);
     }
 }

@@ -12,10 +12,6 @@ import java.util.Collection;
 @ToString
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
-  /*
-   * 로그인 전에는 String 타입이고, 로그인 후에는 JwtAuthentication 타입이다.
-   * 컨트롤러에서 AuthenticationPrincipal 어노테이션을 사용하면 쉽게 접근할 수 있다.
-   */
   private final Object principal;
 
   private String credentials;
