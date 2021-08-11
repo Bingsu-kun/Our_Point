@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class CookieUtil {
 
-    public Cookie createCookie(String cookieName, String value) {
+    static public Cookie createCookie(String cookieName, String value) {
         Cookie token = new Cookie(cookieName,value);
         token.setHttpOnly(true);
         token.setMaxAge( (int)(3600 * 1_000L * 24 * 21) );
@@ -13,7 +13,7 @@ public class CookieUtil {
         return token;
     }
 
-    public Cookie getTokenCookie(HttpServletRequest req, String cookieName) {
+    static public Cookie getTokenCookie(HttpServletRequest req, String cookieName) {
         final Cookie[] cookies = req.getCookies();
 
         if (cookies != null) {

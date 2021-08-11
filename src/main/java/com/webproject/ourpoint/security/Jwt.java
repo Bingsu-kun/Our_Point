@@ -26,6 +26,8 @@ public class Jwt {
 
     private final JWTVerifier jwtVerifier;
 
+    public static final String REFRESH_TOKEN_NAME = "refreshToken";
+
     public Jwt(String issuer, String clientSecret, int expirySeconds) {
         this.issuer = issuer;
         this.clientSecret = clientSecret;
@@ -75,6 +77,7 @@ public class Jwt {
         return newAccessToken(claims);
     }
 
+    //만료된 또는 만료 직전의 리프레쉬토큰을 리프레쉬한다.
     public String refreshRefreshToken(String token) throws JWTVerificationException {
         Claims claims = verify(token);
         claims.eraseIat();

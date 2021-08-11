@@ -40,15 +40,26 @@ public class FisherService {
 
     @Transactional
     public Fisher join(String email, String password, String name) {
+        //email 중복?
         checkArgument(findByEmail(email).isEmpty(),"This email already exist.");
+        //email 형식 맞음?
         checkArgument(checkAddress(email), "Invalid email address: " + email);
+        //닉네임 중복?
         checkArgument(findByName(name).isEmpty(), "This name already exist.");
+        //비밀번호 입력값 있음?
         checkArgument(isNotEmpty(password), "password must be provided.");
+        //비밀번호 길이 6 ~ 20?
         checkArgument(
                 password.length() >= 6 && password.length() <= 20,
                 "password length must be between 6 and 16 characters."
         );
+        //비밀번호 형식에 맞음?
         checkArgument(PasswordValidation.isValidPassword(password), "password validation failed.");
+        //닉네임 2 ~ 10?
+        checkArgument(
+                name.length() >= 2 && name.length() <= 10,
+                "name length must be between 2 and 10 characters."
+        );
 
         Fisher fisher;
 
@@ -62,7 +73,8 @@ public class FisherService {
 
     @Transactional
     public Fisher login(String email, String password) {
-        checkArgument(password != null, "password must be provided.");
+        checkArgument(isNotEmpty(password), "password must be provided.");
+        checkArgument(isNotEmpty(email),"email must be provided.");
 
         Fisher fisher = findByEmail(email).orElseThrow(() -> new NotFoundException(Fisher.class, email));
         checkArgument(fisher.login(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");

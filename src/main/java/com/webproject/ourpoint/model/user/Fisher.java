@@ -52,10 +52,7 @@ public class Fisher {
         checkArgument(email != null, "email must be provided.");
         checkArgument(password != null, "password must be provided.");
         checkArgument(fishername != null, "username must be provided.");
-        checkArgument(
-                fishername.length() >= 2 && fishername.length() <= 10,
-                "address length must be between 2 and 10 characters."
-        );
+
 
         this.id = id;
         this.email = email;
