@@ -40,7 +40,7 @@ public class FisherController {
                 joinRequest.getName()
         );
         String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-        String refreshToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
         redisUtil.setData(refreshToken, fisher.getFishername(), jwt.getExpirySeconds() * 1_000L * 24 * 21);
         return OK( new JoinResult(apiToken, refreshToken, new FisherDto(fisher)));
     }
@@ -60,7 +60,7 @@ public class FisherController {
         Fisher fisher = fisherService.login(loginRequest.getPrincipal(), loginRequest.getCredentials());
 
         String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-        String refreshToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
         redisUtil.setData(refreshToken, fisher.getFishername(), jwt.getExpirySeconds() * 1_000L * 24 * 21);
         return OK( new LoginResult(apiToken, refreshToken, new FisherDto(fisher)));
     }

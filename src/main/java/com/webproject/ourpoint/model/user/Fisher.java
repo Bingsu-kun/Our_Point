@@ -100,4 +100,9 @@ public class Fisher {
         Jwt.Claims claims = Jwt.Claims.of(id, fishername, email, roles);
         return jwt.newAccessToken(claims);
     }
+
+    public String newRefreshToken(Jwt jwt, String[] roles) {
+        Jwt.Claims claims = Jwt.Claims.of(id, fishername, email, roles);
+        return jwt.newRefreshToken(claims);
+    }
 }
