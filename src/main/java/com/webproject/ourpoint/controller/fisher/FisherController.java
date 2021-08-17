@@ -6,6 +6,8 @@ import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.security.Jwt;
 import com.webproject.ourpoint.security.JwtAuthentication;
 import com.webproject.ourpoint.service.FisherService;
+import com.webproject.ourpoint.utils.RedisUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,9 @@ public class FisherController {
 
     private final FisherService fisherService;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     public FisherController(Jwt jwt, FisherService fisherService) {
         this.jwt = jwt;
         this.fisherService = fisherService;
@@ -35,7 +40,9 @@ public class FisherController {
                 joinRequest.getName()
         );
         String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-        return OK( new JoinResult(apiToken, new FisherDto(fisher)));
+        String refreshToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        redisUtil.setData(refreshToken, fisher.getFishername(), jwt.getExpirySeconds() * 1_000L * 24 * 21);
+        return OK( new JoinResult(apiToken, refreshToken, new FisherDto(fisher)));
     }
 
     @GetMapping(path = "/join/exists")
@@ -53,7 +60,9 @@ public class FisherController {
         Fisher fisher = fisherService.login(loginRequest.getPrincipal(), loginRequest.getCredentials());
 
         String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-        return OK( new LoginResult(apiToken, new FisherDto(fisher)));
+        String refreshToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        redisUtil.setData(refreshToken, fisher.getFishername(), jwt.getExpirySeconds() * 1_000L * 24 * 21);
+        return OK( new LoginResult(apiToken, refreshToken, new FisherDto(fisher)));
     }
 
     @GetMapping(path = "/me")

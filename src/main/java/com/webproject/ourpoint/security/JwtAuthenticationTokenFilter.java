@@ -1,7 +1,9 @@
 package com.webproject.ourpoint.security;
 
-import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.webproject.ourpoint.errors.NotFoundException;
+import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.service.FisherService;
+import com.webproject.ourpoint.utils.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
@@ -49,6 +52,9 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
   @Autowired
   private FisherService fisherService;
 
+  @Autowired
+  private RedisUtil redisUtil;
+
   public JwtAuthenticationTokenFilter(String headerKey, Jwt jwt) {
     this.headerKey = headerKey;
     this.jwt = jwt;
@@ -62,82 +68,82 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
 
     // SecurityContextHolder 에서 인증정보를 찾을 수 없다면...
     if (SecurityContextHolder.getContext().getAuthentication() == null) {
-      // HTTP 요청 Header 에서 AccessToken 값을, Cookie에서 RefreshToken 값을 가져와본다.
-      String authorizationToken = obtainAuthorizationToken(request);
+      // HTTP 요청 Header 에서 AccessToken 값을, Cookie에서 RefreshCookie 값을 가져와본다.
+      String AccessToken = obtainAuthorizationToken(request);
+      Cookie refreshCookie = getTokenCookie(request , Jwt.REFRESH_TOKEN_NAME);
       String refreshToken = null;
       // AccessToken 값이 있다면, AccessToken 값을 검증하고 인증정보를 생성해 SecurityContextHolder 에 추가한다.
-      if (authorizationToken != null) {
+      // 만약 AccessToken이 존재한다면
+      if (AccessToken != null) {
         try {
-          Jwt.Claims AccessClaims = verify(authorizationToken);
-          log.debug("Jwt parse result: {}", AccessClaims);
+          Jwt.Claims AccessClaims = verify(AccessToken);
+          log.debug("AccessToken parse result: {}", AccessClaims);
 
           // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 set. false값을 리턴한다면 만료된 상황.
           if (canRefresh(AccessClaims)) {
-            String refreshedAccessToken = jwt.refreshAccessToken(authorizationToken);
+            String refreshedAccessToken = jwt.refreshAccessToken(AccessToken);
             response.setHeader(headerKey, refreshedAccessToken);
+
+            setAuthByClaim(AccessClaims, request, response, false);
           }
-          // AccessToken이 만료이니 refreshToken을 가져온다.
+          // 만료되었다면 refreshToken을 확인해서 재발급.
           else {
-            Cookie refreshCookie = getTokenCookie(request , Jwt.REFRESH_TOKEN_NAME);
             if (refreshCookie != null) {
-              refreshToken = refreshCookie.getValue();
+              try {
+                refreshToken = refreshCookie.getValue();
+
+                Jwt.Claims RefreshClaims = verify(refreshToken);
+                log.debug("RefreshToken parse result: {}", RefreshClaims);
+
+                // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 add. false값을 리턴한다면 만료된 상황.
+                if (canRefresh(RefreshClaims)) {
+                  String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
+                  Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
+                  response.addCookie(refreshedRefreshCookie);
+
+                  String redisToken = redisUtil.getData(refreshToken);
+                  Jwt.Claims RedisClaims = verify(redisToken);
+                  log.debug("RedisToken parse result: {}", RedisClaims);
+
+                  setAuthByClaim(RedisClaims, request, response, true);
+                }
+              } catch (Exception e) {
+                log.warn("RefreshToken processing failed: {}", e.getMessage());
+              }
             }
-          }
-
-          Long userKey = AccessClaims.userKey;
-          String name = AccessClaims.name;
-          String email = AccessClaims.email;
-
-          List<GrantedAuthority> authorities = obtainAuthorities(AccessClaims);
-
-          if (nonNull(userKey) && isNotEmpty(name) && isNotEmpty(email) && authorities.size() > 0) {
-            JwtAuthenticationToken authentication =
-                    new JwtAuthenticationToken(new JwtAuthentication(userKey, name, email), null, authorities);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
           }
         }
         catch (Exception e) {
           log.warn("AccessToken processing failed: {}", e.getMessage());
         }
+      }
+      // AccessToken이 존재하지 않는다면
+      else if (refreshCookie != null) {
         try {
-          if(refreshToken != null) {
-            Jwt.Claims RefreshClaims = verify(refreshToken);
-            log.debug("Jwt parse result: {}", RefreshClaims);
+          refreshToken = refreshCookie.getValue();
 
-            // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 add. false값을 리턴한다면 만료된 상황.
-            if (canRefresh(RefreshClaims)) {
-              String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
-              Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
-              response.addCookie(refreshedRefreshCookie);
-            }
+          Jwt.Claims RefreshClaims = verify(refreshToken);
+          log.debug("RefreshToken parse result: {}", RefreshClaims);
 
-            //TODO - Redis 연동해서 refreshToken과 같은 값 찾아온 후 인증 절차 처리.
+          // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 add. false값을 리턴한다면 만료된 상황.
+          if (canRefresh(RefreshClaims)) {
+            String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
+            Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
+            response.addCookie(refreshedRefreshCookie);
 
-            Long userKey = RefreshClaims.userKey;
-            String name = RefreshClaims.name;
-            String email = RefreshClaims.email;
+            String redisToken = redisUtil.getData(refreshToken);
+            Jwt.Claims RedisClaims = verify(redisToken);
+            log.debug("RedisToken parse result: {}", RedisClaims);
 
-            /*
-            redisToken 변수 생성
-
-            RuserKey, Rname, Remail 생성.
-
-             if ( 키, 네임, 이메일 매칭) {
-                JwtAuthenticationToken authentication =
-                    new JwtAuthenticationToken(new JwtAuthentication(userKey, name, email), null, authorities);
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                Fisher fisher = fisherService.findById(userKey);
-                String newAccessToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-                response.setHeader(headerKey, newAccessToken);
-             }
-             */
+            setAuthByClaim(RedisClaims, request, response, true);
           }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
           log.warn("RefreshToken processing failed: {}", e.getMessage());
         }
+      }
+      // 둘 다 존재하지 않음.
+      else {
+        log.debug("Access and Refresh Tokens not exists.");
       }
     } else {
       log.debug("SecurityContextHolder not populated with security token, as it already contained: '{}'",
@@ -178,6 +184,29 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
     }
 
     return null;
+  }
+
+  //isRefresh 파라미터는 이 함수가 쓰일때, RefreshToken 검증에 쓰이는지 확인하기 위함.
+  private void setAuthByClaim(Jwt.Claims claims, HttpServletRequest request, HttpServletResponse response, boolean isRefresh) {
+    Long userKey = claims.userKey;
+    String name = claims.name;
+    String email = claims.email;
+
+    List<GrantedAuthority> authorities = obtainAuthorities(claims);
+
+    if (nonNull(userKey) && isNotEmpty(name) && isNotEmpty(email) && authorities.size() > 0) {
+      JwtAuthenticationToken authentication =
+              new JwtAuthenticationToken(new JwtAuthentication(userKey, name, email), null, authorities);
+      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      if (isRefresh) {
+        //refresh 권한이 확인되면 AccessToken을 Header에 담아 보냄.
+        Fisher fisher = fisherService.findByEmail(email).orElseThrow(() -> new NotFoundException(Fisher.class, email));
+        String newAccessToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        response.setHeader(headerKey, newAccessToken);
+      }
+    }
   }
 
   private Jwt.Claims verify(String token) {
