@@ -6,6 +6,7 @@ import com.webproject.ourpoint.model.user.Role;
 import com.webproject.ourpoint.repository.FisherRepository;
 import com.webproject.ourpoint.utils.PasswordValidation;
 import com.webproject.ourpoint.errors.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,24 +42,20 @@ public class FisherService {
     @Transactional
     public Fisher join(String email, String password, String name) {
         //email 중복?
-        checkArgument(findByEmail(email).isEmpty(),"This email already exist.");
+        checkArgument(findByEmail(email).isEmpty(),"This email already exist.",HttpStatus.CONFLICT);
         //email 형식 맞음?
-        checkArgument(checkAddress(email), "Invalid email address: " + email);
+        checkArgument(checkAddress(email), "Invalid email address: " + email,HttpStatus.BAD_REQUEST);
         //닉네임 중복?
-        checkArgument(findByName(name).isEmpty(), "This name already exist.");
+        checkArgument(findByName(name).isEmpty(), "This name already exist.",HttpStatus.CONFLICT);
         //비밀번호 입력값 있음?
-        checkArgument(isNotEmpty(password), "password must be provided.");
-        //비밀번호 길이 6 ~ 20?
-        checkArgument(
-                password.length() >= 6 && password.length() <= 20,
-                "password length must be between 6 and 16 characters."
-        );
+        checkArgument(isNotEmpty(password), "password must be provided.", HttpStatus.BAD_REQUEST);
         //비밀번호 형식에 맞음?
         checkArgument(PasswordValidation.isValidPassword(password), "password validation failed.");
         //닉네임 2 ~ 10?
         checkArgument(
                 name.length() >= 2 && name.length() <= 10,
-                "name length must be between 2 and 10 characters."
+                "name length must be between 2 and 10 characters.",
+                HttpStatus.NOT_ACCEPTABLE
         );
 
         Fisher fisher;
@@ -73,11 +70,12 @@ public class FisherService {
 
     @Transactional
     public Fisher login(String email, String password) {
-        checkArgument(isNotEmpty(password), "password must be provided.");
-        checkArgument(isNotEmpty(email),"email must be provided.");
+        checkArgument(isNotEmpty(password), "password must be provided.", HttpStatus.BAD_REQUEST);
+        checkArgument(isNotEmpty(email),"email must be provided.", HttpStatus.BAD_REQUEST);
+        checkArgument(checkAddress(email), "Invalid email address: " + email,HttpStatus.NOT_ACCEPTABLE);
 
         Fisher fisher = findByEmail(email).orElseThrow(() -> new NotFoundException(Fisher.class, email));
-        checkArgument(fisher.login(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
+        checkArgument(fisher.login(passwordEncoder, password),"비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
         save(fisher);
         return fisher;
     }
@@ -85,7 +83,7 @@ public class FisherService {
     @Transactional
     public Fisher changeName(Id<Fisher,Long> id, String password, String changeName) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
-        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
         fisher.setFishername(changeName);
         save(fisher);
         return fisher;
@@ -94,7 +92,7 @@ public class FisherService {
     @Transactional
     public Fisher changePassword(Id<Fisher,Long> id, String password, String changePassword) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
-        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.");
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
         fisher.setPassword(changePassword);
         save(fisher);
         return fisher;
@@ -104,7 +102,7 @@ public class FisherService {
     public void delete(Id<Fisher,Long> id, String email, String password) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
         checkArgument(fisher.getEmail().equals(email), "이메일이 일치하지 않습니다.");
-        checkArgument(fisher.isPasswordMatch(passwordEncoder, password), "비밀번호가 일치하지 않습니다.");
+        checkArgument(fisher.isPasswordMatch(passwordEncoder, password), "비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
         fisherRepository.delete(fisher);
     }
 
@@ -141,7 +139,7 @@ public class FisherService {
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findById(Id<Fisher, Long> userId) {
-        checkArgument(userId != null, "userId must be provided.");
+        checkArgument(userId != null, "userId must be provided.",HttpStatus.BAD_REQUEST);
 
         return fisherRepository.findById(userId.value());
     }
@@ -149,14 +147,14 @@ public class FisherService {
     @Transactional(readOnly = true)
     public Optional<Fisher> findByEmail(String email) {
         checkArgument(checkAddress(email), "Invalid email address: " + email);
-        checkArgument(email != null, "email must be provided.");
+        checkArgument(email != null, "email must be provided.",HttpStatus.BAD_REQUEST);
 
         return Optional.ofNullable(fisherRepository.findByEmail(email));
     }
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findByName(String name) {
-        checkArgument(name != null, "name must be provided.");
+        checkArgument(name != null, "name must be provided.",HttpStatus.BAD_REQUEST);
 
         return Optional.ofNullable(fisherRepository.findByName(name));
     }
