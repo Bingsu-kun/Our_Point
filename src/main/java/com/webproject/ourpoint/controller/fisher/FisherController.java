@@ -47,15 +47,23 @@ public class FisherController {
 
     @GetMapping(path = "/join/exists")
     public ApiResult<?> checkExists(@RequestBody ExistRequest existRequest) {
-        if (fisherService.findByEmail(existRequest.getEmail()).isPresent())
-            return ERROR("email exist", HttpStatus.CONFLICT);
-        else if (fisherService.findByName(existRequest.getName()).isPresent())
-            return ERROR("name exist", HttpStatus.CONFLICT);
+        if (existRequest.getEmail() != null) {
+            if (fisherService.findByEmail(existRequest.getEmail()).isPresent())
+                return ERROR("email exist", HttpStatus.CONFLICT);
+            else
+                return OK("available");
+        }
+        else if (existRequest.getName() != null) {
+            if (fisherService.findByName(existRequest.getName()).isPresent())
+                return ERROR("name exist", HttpStatus.CONFLICT);
+            else
+                return OK("available");
+        }
         else
-            return OK("available");
+            return ERROR("email and name are both null", HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(path = "/login")
+    @PostMapping(path = "/login")
     public ApiResult<LoginResult> login(@RequestBody LoginRequest loginRequest) {
         Fisher fisher = fisherService.login(loginRequest.getPrincipal(), loginRequest.getCredentials());
 
