@@ -26,14 +26,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
+import static com.webproject.ourpoint.utils.CookieUtil.getTokenCookie;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static com.webproject.ourpoint.utils.CookieUtil.getTokenCookie;
 
 /*
  * HTTP Request-Header 에서 JWT 값을 추출하고, JWT 값이 올바르다면 인증정보 JwtAuthenticationToken을 생성한다.

@@ -7,8 +7,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootTest
 class OurpointApplicationTests {
 
+	FisherServiceTest fisherServiceTest = new FisherServiceTest();
+
 	@Test
-	void contextLoads() {;
+	void contextLoads() {
 	}
 
 }

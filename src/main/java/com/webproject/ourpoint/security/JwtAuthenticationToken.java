@@ -1,5 +1,6 @@
 package com.webproject.ourpoint.security;
 
+import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -10,6 +11,7 @@ import java.util.Collection;
 
 
 @ToString
+@Getter
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
   private final Object principal;
@@ -34,16 +36,6 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
   AuthenticationRequest authenticationRequest() {
     return new AuthenticationRequest(String.valueOf(principal), credentials);
-  }
-
-  @Override
-  public Object getPrincipal() {
-    return principal;
-  }
-
-  @Override
-  public String getCredentials() {
-    return credentials;
   }
 
   public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {

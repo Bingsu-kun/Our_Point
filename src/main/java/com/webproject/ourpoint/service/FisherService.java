@@ -47,10 +47,8 @@ public class FisherService {
         checkArgument(checkAddress(email), "Invalid email address: " + email,HttpStatus.BAD_REQUEST);
         //닉네임 중복?
         checkArgument(findByName(name).isEmpty(), "This name already exist.",HttpStatus.CONFLICT);
-        //비밀번호 입력값 있음?
-        checkArgument(isNotEmpty(password), "password must be provided.", HttpStatus.BAD_REQUEST);
         //비밀번호 형식에 맞음?
-        checkArgument(PasswordValidation.isValidPassword(password), "password validation failed.");
+        checkArgument(PasswordValidation.isValidPassword(password), "password validation failed.",HttpStatus.BAD_REQUEST);
         //닉네임 2 ~ 10?
         checkArgument(
                 name.length() >= 2 && name.length() <= 10,
@@ -110,7 +108,7 @@ public class FisherService {
     @Transactional
     public Fisher changeRole(Id<Fisher,Long> id, String fishername, String changeRole) {
         checkArgument(findById(id).orElseThrow(() -> new NotFoundException(Fisher.class,id))
-                .getRole().equals(Role.ADMIN.name()),"관리자가 아닙니다.");
+                .getRole().equals(Role.ADMIN.name()),"관리자가 아닙니다.",HttpStatus.UNAUTHORIZED);
 
         Fisher fisher = findByName(fishername).orElseThrow(() -> new NotFoundException(Fisher.class, fishername));
 
