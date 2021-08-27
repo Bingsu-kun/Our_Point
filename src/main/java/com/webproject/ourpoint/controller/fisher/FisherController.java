@@ -6,6 +6,7 @@ import com.webproject.ourpoint.errors.UnauthorizedException;
 import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.security.*;
 import com.webproject.ourpoint.service.FisherService;
+import com.webproject.ourpoint.utils.EmailFormatValidation;
 import com.webproject.ourpoint.utils.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,22 +53,26 @@ public class FisherController {
         return OK( new JoinResult(apiToken, refreshToken, new FisherDto(fisher)));
     }
 
-    @GetMapping(path = "/join/exists")
-    public ApiResult<?> checkExists(@RequestBody ExistRequest existRequest) {
-        if (existRequest.getEmail() != null) {
-            if (fisherService.findByEmail(existRequest.getEmail()).isPresent())
-                return ERROR("email exist", HttpStatus.CONFLICT);
-            else
-                return OK("available");
-        }
-        else if (existRequest.getName() != null) {
-            if (fisherService.findByName(existRequest.getName()).isPresent())
-                return ERROR("name exist", HttpStatus.CONFLICT);
-            else
-                return OK("available");
-        }
+    @GetMapping(path = "/join/email/exists")
+    public ApiResult<?> checkEmailExists(@RequestBody ExistRequest existRequest) {
+        String request = existRequest.getRequest();
+        if (!EmailFormatValidation.checkAddress(request))
+            return ERROR("이메일 형식에 맞지 않습니다.",HttpStatus.BAD_REQUEST);
+        else if (fisherService.findByEmail(request).isPresent())
+            return ERROR("이메일이 이미 존재합니다.",HttpStatus.CONFLICT);
         else
-            return ERROR("email and name are both null", HttpStatus.BAD_REQUEST);
+            return OK("available");
+    }
+
+    @GetMapping(path = "/join/name/exists")
+    public ApiResult<?> checkNameExists(@RequestBody ExistRequest existRequest) {
+        String request = existRequest.getRequest();
+        if (request.length() < 2 || request.length() > 10)
+            return ERROR("이메일 형식에 맞지 않습니다.",HttpStatus.BAD_REQUEST);
+        else if (fisherService.findByName(request).isPresent())
+            return ERROR("이메일이 이미 존재합니다.",HttpStatus.CONFLICT);
+        else
+            return OK("available");
     }
 
     @PostMapping(path = "/login")
