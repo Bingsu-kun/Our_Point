@@ -144,7 +144,7 @@ public class FisherService {
 
     @Transactional(readOnly = true)
     public Optional<Fisher> findByEmail(String email) {
-        checkArgument(checkAddress(email), "Invalid email address: " + email);
+        checkArgument(checkAddress(email), "Invalid email address: " + email,HttpStatus.BAD_REQUEST);
         checkArgument(email != null, "email must be provided.",HttpStatus.BAD_REQUEST);
 
         return Optional.ofNullable(fisherRepository.findByEmail(email));

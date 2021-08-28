@@ -8,9 +8,5 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 public class ExistRequest {
-
-    private String email;
-
-    private String name;
-
+    private String req;
 }

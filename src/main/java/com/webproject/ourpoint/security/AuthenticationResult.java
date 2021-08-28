@@ -14,17 +14,13 @@ public class AuthenticationResult {
 
   private final String apiToken;
 
-  private final String refreshToken;
-
   private final Fisher fisher;
 
-  public AuthenticationResult(String apiToken, String refreshToken, Fisher fisher) {
+  public AuthenticationResult(String apiToken, Fisher fisher) {
     checkArgument(apiToken != null, "apiToken must be provided.");
-    checkArgument(refreshToken != null, "refreshToken must be provided.");
     checkArgument(fisher != null, "user must be provided.");
 
     this.apiToken = apiToken;
-    this.refreshToken = refreshToken;
     this.fisher = fisher;
   }
 

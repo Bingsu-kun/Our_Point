@@ -48,8 +48,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         new JwtAuthenticationToken(new JwtAuthentication(fisher.getId(), fisher.getFishername(), fisher.getEmail()), null, createAuthorityList(fisher.getRole()));
       // JWT 값을 생성한다.
       String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-      String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
-      authenticated.setDetails(new AuthenticationResult(apiToken, refreshToken, fisher));
+      authenticated.setDetails(new AuthenticationResult(apiToken, fisher));
       return authenticated;
     } catch (NotFoundException e) {
       throw new UsernameNotFoundException(e.getMessage());

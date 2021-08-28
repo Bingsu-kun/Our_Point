@@ -109,7 +109,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 // API에 맞춰서 antMatchers 작성.
                 .antMatchers("/fisher/join").permitAll()
-                .antMatchers("/fisher/join/exists").permitAll()
+                .antMatchers("/fisher/join/email/exists").permitAll()
+                .antMatchers("/fisher/join/name/exists").permitAll()
                 .antMatchers("/fisher/me").authenticated()
                 .antMatchers("/fisher/login").permitAll()
                 .antMatchers("/fisher/me/name/change").authenticated()

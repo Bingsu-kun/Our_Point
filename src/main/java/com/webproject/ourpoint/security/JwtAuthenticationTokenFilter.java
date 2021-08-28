@@ -98,6 +98,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
                 if (canRefresh(RefreshClaims)) {
                   String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
                   Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
+                  refreshedRefreshCookie.setHttpOnly(true);
                   response.addCookie(refreshedRefreshCookie);
 
                   String redisToken = redisUtil.getData(refreshToken);
@@ -128,6 +129,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           if (canRefresh(RefreshClaims)) {
             String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
             Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
+            refreshedRefreshCookie.setHttpOnly(true);
             response.addCookie(refreshedRefreshCookie);
 
             String redisToken = redisUtil.getData(refreshToken);
