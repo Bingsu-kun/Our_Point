@@ -1,30 +1,123 @@
 package com.webproject.ourpoint.model.marker;
 
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
+import com.webproject.ourpoint.model.user.Fisher;
+import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.time.LocalDateTime.now;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Builder
 @EqualsAndHashCode
 @Getter
 @ToString
-//@Entity(name = "marker")
+@NoArgsConstructor
+@Entity(name = "marker")
 public class Marker {
 
-    /*TO-DO 마커에 들어갈 내용
-      마커 이름 (내가 찍은 마커 리스트에 표시될 별칭)
-      x축, y축 (위도, 경도)
-      작성자 id
-      낚시 종류
-      채비
-      낚은 어종
-      날짜와 시간 (시간은 아침, 점심, 저녁, 밤, 새벽으로 구분)
-      날씨
-    */
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "marker_id_seq")
+  @SequenceGenerator(name = "marker_id_seq", sequenceName = "marker_id_seq", allocationSize = 1)
+  private Long seq;
 
+  @ManyToOne(targetEntity = Fisher.class, cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+  @JoinColumn(name = "fisher_id")
+  private Long fisherId;
+
+  private String name;
+
+  @Column(nullable = false)
+  private String latitude;
+
+  @Column(nullable = false)
+  private String longitude;
+
+  @Column(nullable = false)
+  private Boolean isPrivate;
+
+  @Column(nullable = false)
+  private int likes;
+
+  private List<Long> likedFishers;
+
+  @Column(nullable = false)
+  private Category category;
+
+  //tag들은 Service에서 #단위로 쪼개져서 String 배열로 저장
+  private String[] tags;
+
+  private String description;
+
+  private LocalDateTime createdAt;
+
+  public Marker(Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
+                Category category, String[] tags, String description) {
+    this(null,fisherId,name,latitude,longitude,isPrivate,0,null,category,tags,description,now());
+  }
+
+  public Marker(Long seq, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
+                int likes, List<Long> likedFishers, Category category, String[] tags, String description, LocalDateTime createdAt) {
+    checkArgument(fisherId != null, "fisherId must be provided.");
+    checkArgument(latitude != null, "latitude must be provided.");
+    checkArgument(longitude != null, "longitude must be provided.");
+    checkArgument(isPrivate != null,"isPrivate must be provided.");
+    checkArgument(category != null, "category must be provided.");
+    checkArgument(tags.length <= 10, "tags must be less than 10");
+    checkArgument(description.length() <= 100, "description must be lower than 100");
+
+    this.seq = seq;
+    this.fisherId = fisherId;
+    this.name = name;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.isPrivate = isPrivate;
+    this.likes = likes;
+    this.likedFishers = likedFishers;
+    this.category = category;
+    this.tags = tags;
+    this.description = description;
+    this.createdAt = defaultIfNull(createdAt, now());
+  }
+
+  //마커 위치 변경
+  public void setLatlng(String latitude, String longitude) {
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
+  //마커 이름 변경
+  public void setName(String name) {
+    this.name = name;
+  }
+  //좋아요 증가, 감소
+  public void addLikes(Long fisherId) {
+    checkArgument(!likedFishers.contains(fisherId),"this fisher already liked this post.");
+    this.likes++;
+    this.likedFishers.add(fisherId);
+  }
+  public void reduceLikes(Long fisherId) {
+    checkArgument(likedFishers.contains(fisherId),"this fisher already canceled liking this post.");
+    this.likes--;
+    this.likedFishers.remove(fisherId);
+  }
+  //공개 여부 설정
+  public void reverseIsPrivate() {
+    this.isPrivate = !this.isPrivate;
+  }
+  //카테고리 변경
+  public void setCategory(Category category) {
+    this.category = category;
+  }
+  //태그 변경
+  public void setTags(String[] tags) {
+    this.tags = tags;
+  }
+  //설명 변경
+  public void setDescription(String description) {
+    this.description = description;
+  }
 }
