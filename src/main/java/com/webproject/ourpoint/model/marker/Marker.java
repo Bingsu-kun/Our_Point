@@ -17,36 +17,26 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @Getter
 @ToString
 @NoArgsConstructor
-@Entity(name = "marker")
 public class Marker {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "marker_id_seq")
-  @SequenceGenerator(name = "marker_id_seq", sequenceName = "marker_id_seq", allocationSize = 1)
-  private Long seq;
+  private Long markerId;
 
-  @ManyToOne(targetEntity = Fisher.class, cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-  @JoinColumn(name = "fisher_id")
   private Long fisherId;
 
   private String name;
 
-  @Column(nullable = false)
   private String latitude;
 
-  @Column(nullable = false)
   private String longitude;
 
-  @Column(nullable = false)
   private Boolean isPrivate;
 
-  @Column(nullable = false)
   private int likes;
 
   private List<Long> likedFishers;
 
   @Column(nullable = false)
-  private Category category;
+  private String category;
 
   //tag들은 Service에서 #단위로 쪼개져서 String 배열로 저장
   private String[] tags;
@@ -60,7 +50,7 @@ public class Marker {
     this(null,fisherId,name,latitude,longitude,isPrivate,0,null,category,tags,description,now());
   }
 
-  public Marker(Long seq, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
+  public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
                 int likes, List<Long> likedFishers, Category category, String[] tags, String description, LocalDateTime createdAt) {
     checkArgument(fisherId != null, "fisherId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
@@ -70,7 +60,7 @@ public class Marker {
     checkArgument(tags.length <= 10, "tags must be less than 10");
     checkArgument(description.length() <= 100, "description must be lower than 100");
 
-    this.seq = seq;
+    this.markerId = markerId;
     this.fisherId = fisherId;
     this.name = name;
     this.latitude = latitude;
@@ -78,7 +68,7 @@ public class Marker {
     this.isPrivate = isPrivate;
     this.likes = likes;
     this.likedFishers = likedFishers;
-    this.category = category;
+    this.category = category.name();
     this.tags = tags;
     this.description = description;
     this.createdAt = defaultIfNull(createdAt, now());
@@ -110,7 +100,7 @@ public class Marker {
   }
   //카테고리 변경
   public void setCategory(Category category) {
-    this.category = category;
+    this.category = category.name();
   }
   //태그 변경
   public void setTags(String[] tags) {

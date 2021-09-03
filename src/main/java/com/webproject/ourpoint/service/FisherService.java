@@ -6,6 +6,7 @@ import com.webproject.ourpoint.model.user.Role;
 import com.webproject.ourpoint.repository.FisherRepository;
 import com.webproject.ourpoint.utils.PasswordValidation;
 import com.webproject.ourpoint.errors.NotFoundException;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -79,6 +80,7 @@ public class FisherService {
     }
 
     @Transactional
+    @Modifying(clearAutomatically = true)
     public Fisher changeName(Id<Fisher,Long> id, String password, String changeName) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
         checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
@@ -88,6 +90,7 @@ public class FisherService {
     }
 
     @Transactional
+    @Modifying(clearAutomatically = true)
     public Fisher changePassword(Id<Fisher,Long> id, String password, String changePassword) {
         Fisher fisher = findById(id).orElseThrow(() -> new NotFoundException(Fisher.class, id));
         checkArgument(fisher.isPasswordMatch(passwordEncoder, password),"비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
@@ -106,6 +109,7 @@ public class FisherService {
 
     // 이 메소드는 관리자 전용입니다.
     @Transactional
+    @Modifying(clearAutomatically = true)
     public Fisher changeRole(Id<Fisher,Long> id, String fishername, String changeRole) {
         checkArgument(findById(id).orElseThrow(() -> new NotFoundException(Fisher.class,id))
                 .getRole().equals(Role.ADMIN.name()),"관리자가 아닙니다.",HttpStatus.UNAUTHORIZED);
@@ -136,10 +140,10 @@ public class FisherService {
     //-------------------------read only methods------------------------------------
 
     @Transactional(readOnly = true)
-    public Optional<Fisher> findById(Id<Fisher, Long> userId) {
-        checkArgument(userId != null, "userId must be provided.",HttpStatus.BAD_REQUEST);
+    public Optional<Fisher> findById(Id<Fisher, Long> fisherId) {
+        checkArgument(fisherId != null, "markerId must be provided.",HttpStatus.BAD_REQUEST);
 
-        return fisherRepository.findById(userId.value());
+        return fisherRepository.findById(fisherId.value());
     }
 
     @Transactional(readOnly = true)
