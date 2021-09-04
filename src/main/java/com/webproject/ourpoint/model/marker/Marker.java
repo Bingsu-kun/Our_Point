@@ -35,7 +35,6 @@ public class Marker {
 
   private List<Long> likedFishers;
 
-  @Column(nullable = false)
   private String category;
 
   //tag들은 Service에서 #단위로 쪼개져서 String 배열로 저장
@@ -74,40 +73,4 @@ public class Marker {
     this.createdAt = defaultIfNull(createdAt, now());
   }
 
-  //마커 위치 변경
-  public void setLatlng(String latitude, String longitude) {
-    this.latitude = latitude;
-    this.longitude = longitude;
-  }
-  //마커 이름 변경
-  public void setName(String name) {
-    this.name = name;
-  }
-  //좋아요 증가, 감소
-  public void addLikes(Long fisherId) {
-    checkArgument(!likedFishers.contains(fisherId),"this fisher already liked this post.");
-    this.likes++;
-    this.likedFishers.add(fisherId);
-  }
-  public void reduceLikes(Long fisherId) {
-    checkArgument(likedFishers.contains(fisherId),"this fisher already canceled liking this post.");
-    this.likes--;
-    this.likedFishers.remove(fisherId);
-  }
-  //공개 여부 설정
-  public void reverseIsPrivate() {
-    this.isPrivate = !this.isPrivate;
-  }
-  //카테고리 변경
-  public void setCategory(Category category) {
-    this.category = category.name();
-  }
-  //태그 변경
-  public void setTags(String[] tags) {
-    this.tags = tags;
-  }
-  //설명 변경
-  public void setDescription(String description) {
-    this.description = description;
-  }
 }

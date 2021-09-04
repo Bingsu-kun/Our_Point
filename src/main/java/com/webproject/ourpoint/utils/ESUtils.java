@@ -3,12 +3,15 @@ package com.webproject.ourpoint.utils;
 import com.webproject.ourpoint.model.marker.Category;
 import com.webproject.ourpoint.model.marker.Marker;
 import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -42,14 +45,14 @@ public class ESUtils {
     return client.get(request, RequestOptions.DEFAULT);
   }
 
-  public void updateDocument(String markerId, Map<String , Object> bodyMap) throws IOException {
+  public UpdateResponse updateDocument(String markerId, Map<String , Object> bodyMap) throws IOException {
     UpdateRequest request = new UpdateRequest(INDEX_NAME, markerId).doc(bodyMap);
-    client.update(request, RequestOptions.DEFAULT);
+    return client.update(request, RequestOptions.DEFAULT);
   }
 
-  public void deleteDocument(String markerId) throws IOException {
+  public DeleteResponse deleteDocument(String markerId) throws IOException {
     DeleteRequest request = new DeleteRequest(INDEX_NAME, markerId);
-    client.delete(request, RequestOptions.DEFAULT);
+    return client.delete(request, RequestOptions.DEFAULT);
   }
 
   //------------------------SEARCH------------------------------

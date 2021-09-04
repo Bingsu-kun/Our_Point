@@ -34,13 +34,13 @@ public class FisherController {
 
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private RedisUtil redisUtil;
+    private final RedisUtil redisUtil;
 
-    public FisherController(Jwt jwt, FisherService fisherService, AuthenticationManager authenticationManager) {
+    public FisherController(Jwt jwt, FisherService fisherService, AuthenticationManager authenticationManager, RedisUtil redisUtil) {
         this.jwt = jwt;
         this.fisherService = fisherService;
         this.authenticationManager = authenticationManager;
+        this.redisUtil = redisUtil;
     }
 
     @PostMapping(path = "/join")

@@ -1,7 +1,5 @@
 package com.webproject.ourpoint.controller.fisher;
 
-import com.webproject.ourpoint.controller.ApiError;
-import com.webproject.ourpoint.controller.ApiResult;
 import lombok.Getter;
 import lombok.ToString;
 

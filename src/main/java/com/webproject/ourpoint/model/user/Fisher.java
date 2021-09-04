@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -39,16 +40,18 @@ public class Fisher {
     @Column(nullable = false)
     private String role;
 
+    private List<Long> liked;
+
     private LocalDateTime lastLoginAt;
 
     private LocalDateTime createdAt;
 
     public Fisher(String email, String password, String fishername, String role) {
-        this(null, email, password, fishername, role, null, now());
+        this(null, email, password, fishername, role,null, null, now());
     }
 
     //validation check
-    public Fisher(Long id, String email, String password, String fishername, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public Fisher(Long id, String email, String password, String fishername, String role, List<Long> liked, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
         checkArgument(password != null, "password must be provided.");
         checkArgument(fishername != null, "username must be provided.");
@@ -59,6 +62,7 @@ public class Fisher {
         this.password = password;
         this.fishername = fishername;
         this.role = role;
+        this.liked = liked;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = defaultIfNull(createdAt, now());
     }
@@ -93,6 +97,16 @@ public class Fisher {
     //lastLoginAt update
     public void afterLoginSuccess() {
         lastLoginAt = now();
+    }
+
+    //liked marker controll
+    public void addLike(Long markerId) {
+        checkArgument(!liked.contains(markerId), "This marker already exists.");
+        liked.add(markerId);
+    }
+    public void removeLike(Long markerId) {
+        checkArgument(liked.contains(markerId), "This marker already removed.");
+        liked.remove(markerId);
     }
 
     //Token making method

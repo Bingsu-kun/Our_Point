@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -134,6 +135,28 @@ public class FisherService {
         fisher.setRole(role.name());
         save(fisher);
         return fisher;
+    }
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    public void addLike(Id<Fisher,Long> fisherId, Long markerId) {
+        Fisher fisher = findById(fisherId).orElseThrow(() -> new NotFoundException(Fisher.class, fisherId));
+        fisher.addLike(markerId);
+        save(fisher);
+    }
+
+    @Transactional
+    @Modifying(clearAutomatically = true)
+    public void removeLike(Id<Fisher,Long> fisherId, Long markerId) {
+        Fisher fisher = findById(fisherId).orElseThrow(() -> new NotFoundException(Fisher.class, fisherId));
+        fisher.removeLike(markerId);
+        save(fisher);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Long> getLikeList(Id<Fisher,Long> fisherId) {
+        Fisher fisher = findById(fisherId).orElseThrow(() -> new NotFoundException(Fisher.class, fisherId));
+        return fisher.getLiked();
     }
 
 
