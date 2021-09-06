@@ -4,7 +4,6 @@ import com.webproject.ourpoint.controller.ApiResult;
 import com.webproject.ourpoint.errors.NotFoundException;
 import com.webproject.ourpoint.model.marker.Category;
 import com.webproject.ourpoint.model.marker.Marker;
-import com.webproject.ourpoint.security.AuthenticationRequest;
 import com.webproject.ourpoint.security.JwtAuthentication;
 import com.webproject.ourpoint.service.MarkerService;
 import org.elasticsearch.action.delete.DeleteResponse;

@@ -7,7 +7,6 @@ import com.webproject.ourpoint.model.marker.Marker;
 import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.utils.ESUtils;
 import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.search.SearchHit;
@@ -16,7 +15,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -45,54 +43,25 @@ public class MarkerService {
     checkArgument(category != null, "category must be provided.");
 
     Marker marker = new Marker(fisherId.value(),name,latitude,longitude,isPrivate,category,tagStringToTags(tagString),description);
-
-    try {
-      esUtils.createDocument(marker);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    esUtils.createDocument(marker);
     return marker;
 
   }
 
   @Transactional(readOnly = true)
   public Optional<String> getMarker(Long markerId) {
-
-    GetResponse getResponse = null;
-    try {
-      getResponse = esUtils.getDocument(markerId.toString());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    checkArgument(getResponse != null, "Response is null.");
-    return Optional.ofNullable(getResponse.getSourceAsString());
-
+    return Optional.ofNullable(esUtils.getDocument(markerId.toString()).getSourceAsString());
   }
 
   @Transactional(readOnly = true)
   public Optional<Map<String,Object>> getMarkerToMap(Long markerId) {
-
-    GetResponse getResponse = null;
-    try {
-      getResponse = esUtils.getDocument(markerId.toString());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    checkArgument(getResponse != null, "Response is null.");
-    return Optional.ofNullable(getResponse.getSourceAsMap());
-
+    return Optional.ofNullable(esUtils.getDocument(markerId.toString()).getSourceAsMap());
   }
 
   @Transactional(readOnly = true)
   public Optional<SearchHit[]> getAllMarkers() {
 
-    SearchResponse searchResponse = null;
-    try {
-      searchResponse = esUtils.searchAll();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    checkArgument(searchResponse != null, "Response is null.");
+    SearchResponse searchResponse = esUtils.searchAll();
     SearchHits searchHits = searchResponse.getHits();
     return Optional.ofNullable(searchHits.getHits());
 
@@ -101,13 +70,7 @@ public class MarkerService {
   @Transactional(readOnly = true)
   public Optional<SearchHit[]> searchByKeywordAndCategory(String keyword,Category category) {
 
-    SearchResponse searchResponse = null;
-    try {
-      searchResponse = esUtils.search(keyword,category.name());
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    checkArgument(searchResponse != null, "Response is null.");
+    SearchResponse searchResponse = esUtils.search(keyword,category.name());
     SearchHits searchHits = searchResponse.getHits();
     return Optional.ofNullable(searchHits.getHits());
 
@@ -122,7 +85,6 @@ public class MarkerService {
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
     checkArgument(category != null, "category must be provided.");
-    UpdateResponse updateResponse = null;
     Map<String, Object> bodyMap = new HashMap<>();
 
     bodyMap.put("name",name);
@@ -133,26 +95,14 @@ public class MarkerService {
     bodyMap.put("tags",tagStringToTags(tagString));
     bodyMap.put("description",description);
 
-    try {
-      updateResponse = esUtils.updateDocument(markerId.toString(), bodyMap);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return updateResponse;
+    return esUtils.updateDocument(markerId.toString(), bodyMap);
 
   }
 
   @Transactional
   public DeleteResponse deleteMarker(Id<Fisher, Long> fisherId, Long markerId, Long mfId) {
-    DeleteResponse deleteResponse = null;
     checkArgument(Objects.equals(mfId, fisherId.value()),"you can't delete this marker.");
-    try {
-      deleteResponse = esUtils.deleteDocument(markerId.toString());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return deleteResponse;
-
+    return esUtils.deleteDocument(markerId.toString());
   }
 
   @Transactional
@@ -162,19 +112,16 @@ public class MarkerService {
     int likes = (int) source.get("likes");
     List<Long> likedFishers = (List<Long>) source.get("likedFishers");
 
-    try {
-      if (likedFishers.contains(fisherId.value())) {
-        source.replace("likes", --likes);
-        source.replace("likedFishers", likedFishers.remove(fisherId.value()));
-        fisherService.removeLike(fisherId, markerId);
-      } else {
-        source.replace("likes", ++likes);
-        source.replace("likedFishers", likedFishers.add(fisherId.value()));
-        fisherService.addLike(fisherId, markerId);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
+    if (likedFishers.contains(fisherId.value())) {
+      source.replace("likes", --likes);
+      source.replace("likedFishers", likedFishers.remove(fisherId.value()));
+      fisherService.removeLike(fisherId, markerId);
+    } else {
+      source.replace("likes", ++likes);
+      source.replace("likedFishers", likedFishers.add(fisherId.value()));
+      fisherService.addLike(fisherId, markerId);
     }
+
     return likes;
 
   }

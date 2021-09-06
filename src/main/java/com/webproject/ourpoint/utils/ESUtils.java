@@ -1,13 +1,11 @@
 package com.webproject.ourpoint.utils;
 
-import com.webproject.ourpoint.model.marker.Category;
 import com.webproject.ourpoint.model.marker.Marker;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -35,38 +33,65 @@ public class ESUtils {
 
   //-------------------------CRUD---------------------------------
 
-  public void createDocument(Marker marker) throws IOException {
+  public void createDocument(Marker marker) {
     request = new IndexRequest(INDEX_NAME).id(marker.getMarkerId().toString()).source(marker.toString(), XContentType.JSON);
-    client.index(request, RequestOptions.DEFAULT);
+    try {
+      client.index(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
-  public GetResponse getDocument(String markerId) throws IOException {
+  public GetResponse getDocument(String markerId) {
     GetRequest request = new GetRequest(INDEX_NAME, markerId);
-    return client.get(request, RequestOptions.DEFAULT);
+    GetResponse getResponse = null;
+    try {
+      getResponse = client.get(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return getResponse;
   }
 
-  public UpdateResponse updateDocument(String markerId, Map<String , Object> bodyMap) throws IOException {
+  public UpdateResponse updateDocument(String markerId, Map<String , Object> bodyMap){
     UpdateRequest request = new UpdateRequest(INDEX_NAME, markerId).doc(bodyMap);
-    return client.update(request, RequestOptions.DEFAULT);
+    UpdateResponse updateResponse = null;
+    try {
+      updateResponse = client.update(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return updateResponse;
   }
 
-  public DeleteResponse deleteDocument(String markerId) throws IOException {
+  public DeleteResponse deleteDocument(String markerId) {
     DeleteRequest request = new DeleteRequest(INDEX_NAME, markerId);
-    return client.delete(request, RequestOptions.DEFAULT);
+    DeleteResponse deleteResponse = null;
+    try {
+      deleteResponse = client.delete(request, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return deleteResponse;
   }
 
   //------------------------SEARCH------------------------------
 
   //전부 가져오기
-  public SearchResponse searchAll() throws IOException {
+  public SearchResponse searchAll() {
     SearchRequest searchRequest = new SearchRequest(INDEX_NAME)
             .source(new SearchSourceBuilder().query(QueryBuilders.matchAllQuery()));
-
-    return client.search(searchRequest, RequestOptions.DEFAULT);
+    SearchResponse searchResponse = null;
+    try {
+      searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return searchResponse;
   }
 
   //키워드와 카테고리에 따른 검색
-  public SearchResponse search(String keyword, String category) throws IOException {
+  public SearchResponse search(String keyword, String category) {
     SearchRequest searchRequest = new SearchRequest(INDEX_NAME)
             .source(new SearchSourceBuilder().query(
                     QueryBuilders.boolQuery()
@@ -75,8 +100,13 @@ public class ESUtils {
                             .should(QueryBuilders.wildcardQuery("description", "*" + keyword + "*"))
                             .should(QueryBuilders.wildcardQuery("category", "*" + category + "*"))
             ));
-
-    return client.search(searchRequest, RequestOptions.DEFAULT);
+    SearchResponse searchResponse = null;
+    try {
+      searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return searchResponse;
   }
 
 }
