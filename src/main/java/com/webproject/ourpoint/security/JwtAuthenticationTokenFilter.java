@@ -72,13 +72,13 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
       Cookie refreshCookie = getTokenCookie(request , Jwt.REFRESH_TOKEN_NAME);
       String refreshToken = null;
       // AccessToken 값이 있다면, AccessToken 값을 검증하고 인증정보를 생성해 SecurityContextHolder 에 추가한다.
-      // 만약 AccessToken이 존재한다면
+      // 만약 AccessToken 이 존재한다면
       if (AccessToken != null) {
         try {
           Jwt.Claims AccessClaims = verify(AccessToken);
           log.debug("AccessToken parse result: {}", AccessClaims);
 
-          // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 set. false값을 리턴한다면 만료된 상황.
+          // 만료가 아직 안됐다면 바로 리프레쉬해서 response 에 set. false 값을 리턴한다면 만료된 상황.
           if (canRefresh(AccessClaims)) {
             String refreshedAccessToken = jwt.refreshAccessToken(AccessToken);
             response.setHeader(headerKey, refreshedAccessToken);
@@ -94,11 +94,12 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
                 Jwt.Claims RefreshClaims = verify(refreshToken);
                 log.debug("RefreshToken parse result: {}", RefreshClaims);
 
-                // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 add. false값을 리턴한다면 만료된 상황.
+                // 만료가 아직 안됐다면 바로 리프레쉬해서 response 에 add. false 값을 리턴한다면 만료된 상황.
                 if (canRefresh(RefreshClaims)) {
                   String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
                   Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
                   refreshedRefreshCookie.setHttpOnly(true);
+                  refreshedRefreshCookie.setSecure(true);
                   response.addCookie(refreshedRefreshCookie);
 
                   String redisToken = redisUtil.getData(refreshToken);
@@ -130,6 +131,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
             String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
             Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
             refreshedRefreshCookie.setHttpOnly(true);
+            refreshedRefreshCookie.setSecure(true);
             response.addCookie(refreshedRefreshCookie);
 
             String redisToken = redisUtil.getData(refreshToken);

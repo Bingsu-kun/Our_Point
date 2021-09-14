@@ -7,10 +7,8 @@ import lombok.ToString;
 @ToString
 @Getter
 @NoArgsConstructor
-public class SearchRequestBody {
+public class AllLikedRequest {
 
-  private String keyword;
-
-  private String category;
+  private Long[] markerIds;
 
 }

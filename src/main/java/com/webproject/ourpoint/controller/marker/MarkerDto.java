@@ -29,13 +29,9 @@ public class MarkerDto {
 
   private Boolean isPrivate;
 
-  private int likes;
-
-  private List<Long> likedFishers;
-
   private String category;
 
-  private String[] tags;
+  private String tags;
 
   private String description;
 

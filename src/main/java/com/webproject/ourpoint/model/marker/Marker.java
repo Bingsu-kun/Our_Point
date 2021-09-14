@@ -3,58 +3,60 @@ package com.webproject.ourpoint.model.marker;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.time.LocalDateTime.now;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
-@Builder
 @EqualsAndHashCode
 @Getter
 @ToString
 @NoArgsConstructor
+@Entity(name = "marker")
 public class Marker {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "marker_id_seq")
+  @SequenceGenerator(name = "marker_id_seq", sequenceName = "marker_id_seq", allocationSize = 1)
   private Long markerId;
 
+  @Column(nullable = false)
   private Long fisherId;
 
   private String name;
 
+  @Column(nullable = false)
   private String latitude;
 
+  @Column(nullable = false)
   private String longitude;
 
-  private Boolean isPrivate;
+  @Column(nullable = false)
+  private Boolean isPrivate = false;
 
-  private int likes;
-
-  private List<Long> likedFishers;
-
+  @Column(nullable = false)
   private String category;
 
-  //tag들은 Service에서 #단위로 쪼개져서 String 배열로 저장
-  private String[] tags;
+  private String tags;
 
   private String description;
 
   private LocalDateTime createdAt;
 
   public Marker(Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
-                Category category, String[] tags, String description) {
-    this(null,fisherId,name,latitude,longitude,isPrivate,0,null,category,tags,description,now());
+                String category, String tags, String description) {
+    this(null,fisherId,name,latitude,longitude,isPrivate,category,tags,description,now());
   }
 
   public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
-                int likes, List<Long> likedFishers, Category category, String[] tags, String description, LocalDateTime createdAt) {
+                String category, String tags, String description, LocalDateTime createdAt) {
     checkArgument(fisherId != null, "fisherId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
     checkArgument(isPrivate != null,"isPrivate must be provided.");
     checkArgument(category != null, "category must be provided.");
-    checkArgument(tags.length <= 10, "tags must be less than 10");
     checkArgument(description.length() <= 100, "description must be lower than 100");
 
     this.markerId = markerId;
@@ -63,12 +65,35 @@ public class Marker {
     this.latitude = latitude;
     this.longitude = longitude;
     this.isPrivate = isPrivate;
-    this.likes = likes;
-    this.likedFishers = likedFishers;
-    this.category = category.name();
+    this.category = category;
     this.tags = tags;
     this.description = description;
     this.createdAt = defaultIfNull(createdAt, now());
+  }
+
+  public void setLatlng(String latitude, String longitude) {
+    this.latitude = latitude;
+    this.longitude = longitude;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
+  }
+
+  public void setTags(String tags) {
+    this.tags = tags;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setIsPrivate(boolean isPrivate) {
+    this.isPrivate = isPrivate;
   }
 
 }

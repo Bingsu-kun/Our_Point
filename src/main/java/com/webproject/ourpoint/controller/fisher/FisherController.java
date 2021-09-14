@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static com.webproject.ourpoint.controller.ApiResult.ERROR;
@@ -96,12 +97,12 @@ public class FisherController {
             Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
             refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
             refreshCookie.setHttpOnly(true);
+            refreshCookie.setSecure(true);
             res.addCookie(refreshCookie);
             return OK( result );
         } catch (AuthenticationException e) {
             throw new UnauthorizedException(e.getMessage());
         }
-
     }
 
     @GetMapping(path = "/me")
@@ -134,7 +135,6 @@ public class FisherController {
         );
     }
 
-    //자신의 계정을 삭제합니다. TODO - 이 사람이 작성한 마커도 Cascade로 지워지는 로직 필요합니다.
     @DeleteMapping(path = "/me")
     public ApiResult<?> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody AuthenticationRequest authRequest) {
         fisherService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
