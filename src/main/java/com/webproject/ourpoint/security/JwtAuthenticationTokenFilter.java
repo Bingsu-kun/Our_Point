@@ -65,12 +65,12 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
     HttpServletRequest request = (HttpServletRequest) req;
     HttpServletResponse response = (HttpServletResponse) res;
 
-    // SecurityContextHolder 에서 인증정보를 찾을 수 없다면...
+    // SecurityContextHolder 에서 인증정보를 찾을 수 없다면
     if (SecurityContextHolder.getContext().getAuthentication() == null) {
       // HTTP 요청 Header 에서 AccessToken 값을, Cookie에서 RefreshCookie 값을 가져와본다.
       String AccessToken = obtainAuthorizationToken(request);
       Cookie refreshCookie = getTokenCookie(request , Jwt.REFRESH_TOKEN_NAME);
-      String refreshToken = null;
+      String refreshToken = refreshCookie != null ? refreshCookie.getValue() : null;
       // AccessToken 값이 있다면, AccessToken 값을 검증하고 인증정보를 생성해 SecurityContextHolder 에 추가한다.
       // 만약 AccessToken 이 존재한다면
       if (AccessToken != null) {
@@ -87,10 +87,9 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           }
           // 만료되었다면 refreshToken을 확인해서 재발급.
           else {
-            if (refreshCookie != null) {
+            
+            if (refreshToken != null) {
               try {
-                refreshToken = refreshCookie.getValue();
-
                 Jwt.Claims RefreshClaims = verify(refreshToken);
                 log.debug("RefreshToken parse result: {}", RefreshClaims);
 
@@ -99,7 +98,6 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
                   String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
                   Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
                   refreshedRefreshCookie.setHttpOnly(true);
-                  refreshedRefreshCookie.setSecure(true);
                   response.addCookie(refreshedRefreshCookie);
 
                   String redisToken = redisUtil.getData(refreshToken);
@@ -109,9 +107,10 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
                   setAuthByClaim(RedisClaims, request, response, true);
                 }
               } catch (Exception e) {
-                log.warn("RefreshToken processing failed: {}", e.getMessage());
+                log.warn("RefreshCookie: {}, RefreshToken processing failed: {}", refreshCookie, e.toString());
               }
             }
+            
           }
         }
         catch (Exception e) {
@@ -119,10 +118,9 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
         }
       }
       // AccessToken이 존재하지 않는다면
-      else if (refreshCookie != null) {
+      else if (refreshToken != null) {
+        
         try {
-          refreshToken = refreshCookie.getValue();
-
           Jwt.Claims RefreshClaims = verify(refreshToken);
           log.debug("RefreshToken parse result: {}", RefreshClaims);
 
@@ -131,7 +129,6 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
             String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
             Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
             refreshedRefreshCookie.setHttpOnly(true);
-            refreshedRefreshCookie.setSecure(true);
             response.addCookie(refreshedRefreshCookie);
 
             String redisToken = redisUtil.getData(refreshToken);
@@ -141,8 +138,9 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
             setAuthByClaim(RedisClaims, request, response, true);
           }
         } catch (Exception e) {
-          log.warn("RefreshToken processing failed: {}", e.getMessage());
+          log.warn("RefreshCookie: {}, RefreshToken processing failed: {}", refreshCookie, e.toString());
         }
+        
       }
       // 둘 다 존재하지 않음.
       else {

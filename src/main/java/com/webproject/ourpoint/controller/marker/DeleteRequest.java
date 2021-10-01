@@ -7,7 +7,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @NoArgsConstructor
-public class DeleteRequestBody {
+public class DeleteRequest {
 
   private Long markerId;
 

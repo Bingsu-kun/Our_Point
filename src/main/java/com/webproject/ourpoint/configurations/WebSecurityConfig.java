@@ -25,6 +25,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Filter;
 
 @Configuration
 @EnableWebSecurity
@@ -108,18 +109,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .authorizeRequests()
                 // API에 맞춰서 antMatchers 작성.
-                .antMatchers("/fisher/join").permitAll()
-                .antMatchers("/fisher/join/email/exists").permitAll()
-                .antMatchers("/fisher/join/name/exists").permitAll()
-                .antMatchers("/fisher/me").authenticated()
-                .antMatchers("/fisher/login").permitAll()
-                .antMatchers("/fisher/me/name/change").authenticated()
-                .antMatchers("/fisher/me/password/change").authenticated()
+                .antMatchers("/fisher/join",
+                        "/fisher/join/email/exists",
+                        "/fisher/join/name/exists",
+                        "/fisher/me",
+                        "/fisher/login",
+                        "/fisher/me/name/change",
+                        "/fisher/me/password/change",
+                        "/marker/create",
+                        "/marker/update",
+                        "/marker/delete",
+                        "/marker/all",
+                        "/marker/like",
+                        "/marker/dislike",
+                        "/marker/likes",
+                        "/marker/thiscount",
+                        "/marker/mylikecount",
+                        "/marker/mylikelist").permitAll()
                 .antMatchers("/fisher/role/change").hasRole(Role.ADMIN.name())
-                .antMatchers("/marker/create").authenticated()
-                .antMatchers("/marker/update").authenticated()
-                .antMatchers("/marker/delete").authenticated()
-                .antMatchers("/marker/all").permitAll()
                 .accessDecisionManager(accessDecisionManager())
                 .anyRequest().permitAll()
                 .and()

@@ -11,16 +11,11 @@ public class WebMvcConfigure implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     registry
-            .addMapping("/fisher/**")
-              .allowedOrigins("http://localhost:8888")
-              .allowedOriginPatterns("http://localhost:8888/**")
-              .allowCredentials(true);
-    registry
-            .addMapping("/marker/**")
-              .allowedOrigins("http://localhost:8888")
-              .allowedOriginPatterns("http://localhost:8888/**")
+            .addMapping("/**")
+              .allowedOrigins("http://localhost:8888","http://localhost:8080")
+              .allowedOriginPatterns("http://localhost:8888/**","http://localhost:8080/**")
+              .allowedMethods("*")
+              .maxAge(3600)
               .allowCredentials(true);
   }
-
-
 }

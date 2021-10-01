@@ -14,6 +14,7 @@ import java.util.List;
 
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 
+@CrossOrigin(origins = "http://localhost:8888")
 @RestController
 @RequestMapping("/marker")
 public class MarkerController {
@@ -41,26 +42,26 @@ public class MarkerController {
   }
 
   @PutMapping(path = "/update")
-  public ApiResult<MarkerDto> update(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody UpdateRequestBody updateRequestBody) throws IOException {
+  public ApiResult<MarkerDto> update(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody UpdateRequest updateRequest) throws IOException {
     Marker updatedMarker = markerService.updateMarker(
             authentication.id,
-            updateRequestBody.getMarkerId(),
-            updateRequestBody.getMfId(),
-            updateRequestBody.getName(),
-            updateRequestBody.getLatitude(),
-            updateRequestBody.getLongitude(),
-            updateRequestBody.getIsPrivate(),
-            Category.of(updateRequestBody.getCategory()),
-            updateRequestBody.getTagString(),
-            updateRequestBody.getDescription()
+            updateRequest.getMarkerId(),
+            updateRequest.getMfId(),
+            updateRequest.getName(),
+            updateRequest.getLatitude(),
+            updateRequest.getLongitude(),
+            updateRequest.getIsPrivate(),
+            Category.of(updateRequest.getCategory()),
+            updateRequest.getTagString(),
+            updateRequest.getDescription()
     );
 
     return OK(new MarkerDto(updatedMarker));
   }
 
   @DeleteMapping(path = "/delete")
-  public ApiResult<String> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody DeleteRequestBody deleteRequestBody) throws IOException {
-    markerService.deleteMarker(authentication.id,deleteRequestBody.getMarkerId(), deleteRequestBody.getMfId());
+  public ApiResult<String> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody DeleteRequest deleteRequest) throws IOException {
+    markerService.deleteMarker(authentication.id,deleteRequest.getMarkerId(), deleteRequest.getMfId());
     return OK("deleted");
   }
 
@@ -80,9 +81,19 @@ public class MarkerController {
     return OK(markerService.allMarkersLikeCount(allLikedRequest.getMarkerIds()));
   }
 
-  @GetMapping(path = "/mylike")
-  public ApiResult<Integer> mylikes(@AuthenticationPrincipal JwtAuthentication authentication) {
+  @GetMapping(path = "/thiscount")
+  public ApiResult<Integer> thisMarkerCount(@RequestBody LikeRequest likeRequest) {
+    return OK(markerService.markerLikeCount(likeRequest.getMarkerId()));
+  }
+
+  @GetMapping(path = "/mylikecount")
+  public ApiResult<Integer> myLikeCount(@AuthenticationPrincipal JwtAuthentication authentication) {
     return OK(markerService.fisherLikeCount(authentication.id));
+  }
+
+  @GetMapping(path = "/mylikelist")
+  public ApiResult<List<Marker>> myLikeList(@AuthenticationPrincipal JwtAuthentication authentication) {
+    return OK(markerService.myLikeList(authentication.id));
   }
 
   @GetMapping(path = "/all")

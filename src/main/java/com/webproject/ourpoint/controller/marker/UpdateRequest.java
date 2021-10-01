@@ -7,7 +7,7 @@ import lombok.ToString;
 @ToString
 @Getter
 @NoArgsConstructor
-public class UpdateRequestBody {
+public class UpdateRequest {
 
   private Long markerId;
 

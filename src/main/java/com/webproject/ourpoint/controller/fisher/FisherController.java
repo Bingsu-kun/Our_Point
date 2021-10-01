@@ -7,7 +7,6 @@ import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.security.*;
 import com.webproject.ourpoint.service.FisherService;
 import com.webproject.ourpoint.utils.RedisUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -16,15 +15,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
 
+@CrossOrigin(origins = "http://localhost:8888")
 @RestController
 @RequestMapping("/fisher")
 public class FisherController {
@@ -56,6 +54,7 @@ public class FisherController {
         String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
         redisUtil.setData(fisher.getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
         Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
+        refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
         refreshCookie.setHttpOnly(true);
         res.addCookie(refreshCookie);
         return OK( new JoinResult(apiToken, new FisherDto(fisher)));
@@ -75,9 +74,7 @@ public class FisherController {
     public ApiResult<?> checkNameExists(@RequestBody ExistRequest existRequest) {
         String request = existRequest.getReq();
 
-        if (request.length() < 2 || request.length() > 10)
-            return ERROR("닉네임 형식 오류",HttpStatus.BAD_REQUEST);
-        else if (fisherService.findByName(request).isPresent())
+        if (fisherService.findByName(request).isPresent())
             return ERROR("닉네임 중복",HttpStatus.CONFLICT);
         else
             return OK("available");
@@ -97,7 +94,6 @@ public class FisherController {
             Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
             refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
             refreshCookie.setHttpOnly(true);
-            refreshCookie.setSecure(true);
             res.addCookie(refreshCookie);
             return OK( result );
         } catch (AuthenticationException e) {

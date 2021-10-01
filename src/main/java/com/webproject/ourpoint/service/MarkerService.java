@@ -89,6 +89,17 @@ public class MarkerService {
   }
 
   @Transactional(readOnly = true)
+  public List<Marker> myLikeList(Id<Fisher, Long> fisherId) {
+    List<Liked> likeIds = likedRepository.findLikedByFisherId(fisherId.value());
+    List<Marker> likeMarkers = new ArrayList<>();
+    for (int i = 0; i < likeIds.toArray().length; i++) {
+      Liked l = likeIds.get(i);
+      likeMarkers.add(markerRepository.findById(l.getMarkerId()).orElseThrow(() -> new NotFoundException(String.valueOf(l.getMarkerId()), Marker.class)));
+    }
+    return likeMarkers;
+  }
+
+  @Transactional(readOnly = true)
   public int markerLikeCount(Long markerId) {
     List<Liked> liked = likedRepository.findLikedByMarkerId(markerId);
     return liked.toArray().length;
@@ -103,6 +114,7 @@ public class MarkerService {
     return likeCounts;
   }
 
+  @Transactional(readOnly = true)
   public List<Marker> getAll() {
     return markerRepository.findAll();
   }
