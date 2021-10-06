@@ -8,9 +8,16 @@
 		<version>2.5.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+	<distributionManagement>
+		<repository>
+			<id>localDoc</id>
+			<name>Local Repository</name>
+			<url>file:///Users/hephai/Documents</url>
+		</repository>
+	</distributionManagement>
 	<groupId>com.webproject</groupId>
-	<artifactId>ourpoint</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>FlarePoint</artifactId>
+	<version>1.0.0-Release</version>
 	<name>FlarePoint</name>
 	<description>fishing place pointing application</description>
 	<properties>

@@ -64,7 +64,7 @@ public class MarkerService {
   }
   @Transactional
   public void deleteMarker(Id<Fisher, Long> fisherId, Long markerId, Long mfId) {
-    checkArgument(Objects.equals(mfId, fisherId.value()),"you can't delete this marker.");
+    checkArgument(Objects.equals(mfId, fisherId.value()) || fisherId.value() == 1,"you can't delete this marker.");
     markerRepository.delete(markerRepository.getById(markerId));
   }
 

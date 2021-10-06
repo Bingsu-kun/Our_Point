@@ -1,9 +1,6 @@
-com/webproject/ourpoint/model/user/User.class
-com/webproject/ourpoint/repository/UserRepository.class
-com/webproject/ourpoint/model/marker/Marker$MarkerBuilder.class
-com/webproject/ourpoint/controller/user/UserController.class
-com/webproject/ourpoint/model/user/User$UserBuilder.class
-com/webproject/ourpoint/model/marker/Marker.class
-com/webproject/ourpoint/utils/EmailFormatValidation.class
-com/webproject/ourpoint/OurpointApplication.class
+com/webproject/ourpoint/controller/marker/UpdateRequest.class
 com/webproject/ourpoint/utils/DateTimeUtils.class
+com/webproject/ourpoint/model/marker/Marker.class
+com/webproject/ourpoint/OurpointApplication.class
+com/webproject/ourpoint/controller/marker/DeleteRequest.class
+com/webproject/ourpoint/utils/EmailFormatValidation.class
