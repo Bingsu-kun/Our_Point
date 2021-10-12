@@ -70,9 +70,10 @@ public class MarkerService {
 
   @Transactional
   public Liked like(Id<Fisher, Long> fisherId, Long markerId) {
+    Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException(Marker.class, markerId));
     Liked liked = likedRepository.findLikedByIds(fisherId.value(),markerId);
     checkArgument(liked == null, "already liked.");
-    return likedRepository.save(new Liked(fisherId.value(), markerId));
+    return likedRepository.save(new Liked(fisherId.value(), markerId, marker.getFisherId()));
   }
 
   @Transactional

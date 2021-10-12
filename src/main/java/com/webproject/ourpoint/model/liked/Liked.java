@@ -23,14 +23,18 @@ public class Liked {
   @Column(nullable = false)
   private Long markerId;
 
-  public Liked(Long fisherId, Long markerId) {
-    this(null, fisherId, markerId);
+  @Column(nullable = false)
+  private Long mfId;
+
+  public Liked(Long fisherId, Long markerId, Long mfId) {
+    this(null, fisherId, markerId, mfId);
   }
 
-  public Liked(Long seq, Long fisherId, Long markerId) {
+  public Liked(Long seq, Long fisherId, Long markerId, Long mfId) {
     this.seq = seq;
     this.fisherId = fisherId;
     this.markerId = markerId;
+    this.mfId = mfId;
   }
 
 }
