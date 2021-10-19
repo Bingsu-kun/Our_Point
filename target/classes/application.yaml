@@ -9,11 +9,11 @@ spring:
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: create
+      ddl-auto: update
   cache:
     type: redis
   redis:
-    host: localhost
+    host: 172.31.32.8
     port: 6379
 server:
   port: 8080
