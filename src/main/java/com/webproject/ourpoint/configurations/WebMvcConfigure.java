@@ -12,9 +12,10 @@ public class WebMvcConfigure implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry
             .addMapping("/**")
-              .allowedOrigins("http://localhost:8888","http://localhost:8080")
-              .allowedOriginPatterns("http://localhost:8888/**","http://localhost:8080/**")
+              .allowedOrigins("http://localhost:8888","http://localhost:8080","http://172.31.44.156","http://172.31.44.156:8080","https://172.31.44.156:8080","https://172.31.44.156")
+              .allowedOriginPatterns("http://localhost:8888/**","http://localhost:8080/**","http://172.31.44.156/**","http://172.31.44.156:8080/**","https://172.31.44.156:8080/**","https://172.31.44.156/**")
               .allowedMethods("*")
+              .allowedHeaders("Authorization")
               .maxAge(3600)
               .allowCredentials(true);
   }

@@ -16,125 +16,126 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.Objects;
 
 import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
+import static com.webproject.ourpoint.utils.CookieUtil.getTokenCookie;
 
 @CrossOrigin(origins = "http://localhost:8888")
 @RestController
 @RequestMapping("/fisher")
 public class FisherController {
 
-    private final Jwt jwt;
+  private final Jwt jwt;
 
-    private final FisherService fisherService;
+  private final FisherService fisherService;
 
-    private final AuthenticationManager authenticationManager;
+  private final AuthenticationManager authenticationManager;
 
-    private final RedisUtil redisUtil;
+  private final RedisUtil redisUtil;
 
-    public FisherController(Jwt jwt, FisherService fisherService, AuthenticationManager authenticationManager, RedisUtil redisUtil) {
-        this.jwt = jwt;
-        this.fisherService = fisherService;
-        this.authenticationManager = authenticationManager;
-        this.redisUtil = redisUtil;
+  public FisherController(Jwt jwt, FisherService fisherService, AuthenticationManager authenticationManager, RedisUtil redisUtil) {
+    this.jwt = jwt;
+    this.fisherService = fisherService;
+    this.authenticationManager = authenticationManager;
+    this.redisUtil = redisUtil;
+  }
+
+  @PostMapping(path = "/join")
+  public ApiResult<JoinResult> join(@RequestBody JoinRequest joinRequest, HttpServletResponse res) {
+
+    Fisher fisher = fisherService.join(
+            joinRequest.getPrincipal(),
+            joinRequest.getCredentials(),
+            joinRequest.getName()
+    );
+    String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+    String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
+    redisUtil.setData(fisher.getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+    Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken + "; SameSite=None;");
+    refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
+    refreshCookie.setHttpOnly(true);
+    res.addCookie(refreshCookie);
+    return OK( new JoinResult(apiToken, new FisherDto(fisher)));
+  }
+
+  @PostMapping(path = "/join/email/exists")
+  public ApiResult<?> checkEmailExists(@RequestBody ExistRequest existRequest) {
+    String request = existRequest.getReq();
+
+    if (fisherService.findByEmail(request).isPresent())
+      return ERROR("이메일 중복",HttpStatus.CONFLICT);
+    else
+      return OK("available");
+  }
+
+  @PostMapping(path = "/join/name/exists")
+  public ApiResult<?> checkNameExists(@RequestBody ExistRequest existRequest) {
+    String request = existRequest.getReq();
+
+    if (fisherService.findByName(request).isPresent())
+      return ERROR("닉네임 중복",HttpStatus.CONFLICT);
+    else
+      return OK("available");
+  }
+
+  @PostMapping(path = "/login")
+  public ApiResult<AuthenticationResult> login(@RequestBody AuthenticationRequest authRequest, HttpServletResponse res) throws UnauthorizedException {
+    try {
+      JwtAuthenticationToken authToken = new JwtAuthenticationToken(authRequest.getPrincipal(), authRequest.getCredentials());
+      Authentication authentication = authenticationManager.authenticate(authToken);
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      AuthenticationResult result = (AuthenticationResult) authentication.getDetails();
+
+      String refreshToken = result.getFisher().newRefreshToken(jwt, new String[]{result.getFisher().getRole()});
+      redisUtil.setData(result.getFisher().getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+      Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken + "; SameSite=None;");
+      refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
+      refreshCookie.setHttpOnly(true);
+      res.addCookie(refreshCookie);
+      return OK( result );
+    } catch (AuthenticationException e) {
+      throw new UnauthorizedException(e.getMessage());
     }
+  }
 
-    @PostMapping(path = "/join")
-    public ApiResult<JoinResult> join(@RequestBody JoinRequest joinRequest, HttpServletResponse res) {
+  @GetMapping(path = "/me")
+  public ApiResult<FisherDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
+    Fisher fisher = fisherService.findById(authentication.id).orElseThrow(() -> new NotFoundException(Fisher.class, authentication.id));
+    return  OK(new FisherDto(fisher));
+  }
 
-        Fisher fisher = fisherService.join(
-                joinRequest.getPrincipal(),
-                joinRequest.getCredentials(),
-                joinRequest.getName()
-        );
-        String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-        String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
-        redisUtil.setData(fisher.getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
-        Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
-        refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
-        refreshCookie.setHttpOnly(true);
-        res.addCookie(refreshCookie);
-        return OK( new JoinResult(apiToken, new FisherDto(fisher)));
-    }
+  @PutMapping(path = "/me/name/change")
+  public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+    return OK(
+            new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+    );
+  }
 
-    @PostMapping(path = "/join/email/exists")
-    public ApiResult<?> checkEmailExists(@RequestBody ExistRequest existRequest) {
-        String request = existRequest.getReq();
+  @PutMapping(path = "/role/change")
+  public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+    return OK(
+            new FisherDto(fisherService.changeRole(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+    );
+  }
 
-        if (fisherService.findByEmail(request).isPresent())
-            return ERROR("이메일 중복",HttpStatus.CONFLICT);
-        else
-            return OK("available");
-    }
+  @PutMapping(path = "/me/password/change")
+  public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+    return OK(
+            new FisherDto(fisherService.changePassword(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+    );
+  }
 
-    @PostMapping(path = "/join/name/exists")
-    public ApiResult<?> checkNameExists(@RequestBody ExistRequest existRequest) {
-        String request = existRequest.getReq();
-
-        if (fisherService.findByName(request).isPresent())
-            return ERROR("닉네임 중복",HttpStatus.CONFLICT);
-        else
-            return OK("available");
-    }
-
-    @PostMapping(path = "/login")
-    public ApiResult<AuthenticationResult> login(@RequestBody AuthenticationRequest authRequest, HttpServletResponse res) throws UnauthorizedException {
-        try {
-            JwtAuthenticationToken authToken = new JwtAuthenticationToken(authRequest.getPrincipal(), authRequest.getCredentials());
-            Authentication authentication = authenticationManager.authenticate(authToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            AuthenticationResult result = (AuthenticationResult) authentication.getDetails();
-
-            String refreshToken = result.getFisher().newRefreshToken(jwt, new String[]{result.getFisher().getRole()});
-            redisUtil.setData(result.getFisher().getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
-            Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
-            refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
-            refreshCookie.setHttpOnly(true);
-            res.addCookie(refreshCookie);
-            return OK( result );
-        } catch (AuthenticationException e) {
-            throw new UnauthorizedException(e.getMessage());
-        }
-    }
-
-    @GetMapping(path = "/me")
-    public ApiResult<FisherDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
-        return  OK(
-                fisherService.findById(authentication.id)
-                    .map(FisherDto::new)
-                    .orElseThrow(() -> new NotFoundException(Fisher.class, authentication.id))
-        );
-    }
-
-    @PutMapping(path = "/me/name/change")
-    public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
-        return OK(
-                new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
-        );
-    }
-
-    @PutMapping(path = "/role/change")
-    public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
-        return OK(
-                new FisherDto(fisherService.changeRole(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
-        );
-    }
-
-    @PutMapping(path = "/me/password/change")
-    public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
-        return OK(
-                new FisherDto(fisherService.changePassword(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
-        );
-    }
-
-    @DeleteMapping(path = "/me")
-    public ApiResult<?> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody AuthenticationRequest authRequest) {
-        fisherService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
-        return  OK("deleted");
-    }
+  @DeleteMapping(path = "/me")
+  public ApiResult<?> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody AuthenticationRequest authRequest) {
+    fisherService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
+    return  OK("deleted");
+  }
 
 }
