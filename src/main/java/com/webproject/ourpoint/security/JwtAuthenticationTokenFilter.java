@@ -96,7 +96,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
                 // 만료가 아직 안됐다면 바로 리프레쉬해서 response 에 add. false 값을 리턴한다면 만료된 상황.
                 if (canRefresh(RefreshClaims)) {
                   String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
-                  Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken + "; SameSite=None;");
+                  Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
                   refreshedRefreshCookie.setHttpOnly(true);
                   refreshedRefreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
                   response.addCookie(refreshedRefreshCookie);
@@ -128,7 +128,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
           // 만료가 아직 안됐다면 바로 리프레쉬해서 response에 add. false값을 리턴한다면 만료된 상황.
           if (canRefresh(RefreshClaims)) {
             String refreshedRefreshToken = jwt.refreshRefreshToken(refreshToken);
-            Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken + "; SameSite=None;");
+            Cookie refreshedRefreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshedRefreshToken);
             refreshedRefreshCookie.setHttpOnly(true);
             refreshedRefreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
             response.addCookie(refreshedRefreshCookie);

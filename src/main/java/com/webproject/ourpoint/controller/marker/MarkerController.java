@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 
-@CrossOrigin(origins = "http://localhost:8888")
+@CrossOrigin(origins = {"http://localhost:8080", "http://172.31.44.156:8080", "https://172.31.44.156:8080"})
 @RestController
 @RequestMapping("/marker")
 public class MarkerController {

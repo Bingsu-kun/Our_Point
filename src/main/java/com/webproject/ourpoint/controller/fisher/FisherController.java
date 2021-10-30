@@ -16,17 +16,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import java.util.Objects;
 
 import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
-import static com.webproject.ourpoint.utils.CookieUtil.getTokenCookie;
 
-@CrossOrigin(origins = "http://localhost:8888")
+@CrossOrigin(origins = {"http://localhost:8080", "http://172.31.44.156:8080", "https://172.31.44.156:8080"})
 @RestController
 @RequestMapping("/fisher")
 public class FisherController {
@@ -57,7 +53,7 @@ public class FisherController {
     String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
     String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
     redisUtil.setData(fisher.getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
-    Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken + "; SameSite=None;");
+    Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
     refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
     refreshCookie.setHttpOnly(true);
     res.addCookie(refreshCookie);
@@ -95,7 +91,7 @@ public class FisherController {
 
       String refreshToken = result.getFisher().newRefreshToken(jwt, new String[]{result.getFisher().getRole()});
       redisUtil.setData(result.getFisher().getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
-      Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken + "; SameSite=None;");
+      Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
       refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
       refreshCookie.setHttpOnly(true);
       res.addCookie(refreshCookie);
