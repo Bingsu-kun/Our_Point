@@ -1,7 +1,6 @@
 package com.webproject.ourpoint.repository;
 
 import com.webproject.ourpoint.model.liked.Liked;
-import com.webproject.ourpoint.model.marker.Marker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

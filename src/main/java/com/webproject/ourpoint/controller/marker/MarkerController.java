@@ -76,12 +76,12 @@ public class MarkerController {
     return OK("deleted");
   }
 
-  @GetMapping(path = "/likes")
+  @PostMapping(path = "/likes")
   public ApiResult<List<Integer>> likes(@RequestBody AllLikedRequest allLikedRequest) {
     return OK(markerService.allMarkersLikeCount(allLikedRequest.getMarkerIds()));
   }
 
-  @GetMapping(path = "/thiscount")
+  @PostMapping(path = "/thiscount")
   public ApiResult<Integer> thisMarkerCount(@RequestBody LikeRequest likeRequest) {
     return OK(markerService.markerLikeCount(likeRequest.getMarkerId()));
   }
