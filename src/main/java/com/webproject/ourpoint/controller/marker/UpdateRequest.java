@@ -21,8 +21,6 @@ public class UpdateRequest {
 
   private Boolean isPrivate;
 
-  private String category;
-
   private String tagString;
 
   private String description;

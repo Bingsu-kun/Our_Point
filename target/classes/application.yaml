@@ -1,19 +1,22 @@
 spring:
   datasource:
-    url: jdbc:postgresql://172.17.0.3:5432/postgres
+#    url: jdbc:postgresql://172.17.0.3:5432/postgres
+#    password: dlduwls0822!
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: dlduwls0822!
+    url: jdbc:postgresql://localhost:5432/postgres
+    password: 1018
   jpa:
     show-sql: true
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
+      ddl-auto: create
   cache:
     type: redis
   redis:
-    host: 172.17.0.2
+#    host: 172.17.0.2
+    host: localhost
     port: 6379
 server:
   port: 8080

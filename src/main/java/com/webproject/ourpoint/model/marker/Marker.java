@@ -1,6 +1,7 @@
 package com.webproject.ourpoint.model.marker;
 
 
+import com.webproject.ourpoint.model.user.Fisher;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,28 +37,23 @@ public class Marker {
   @Column(nullable = false)
   private Boolean isPrivate = false;
 
-  @Column(nullable = false)
-  private String category;
-
   private String tags;
 
   private String description;
 
   private LocalDateTime createdAt;
 
-  public Marker(Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
-                String category, String tags, String description) {
-    this(null,fisherId,name,latitude,longitude,isPrivate,category,tags,description,now());
+  public Marker(Long fisherId, String name, String latitude, String longitude, Boolean isPrivate, String tags, String description) {
+    this(null,fisherId,name,latitude,longitude,isPrivate,tags,description,now());
   }
 
   public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
-                String category, String tags, String description, LocalDateTime createdAt) {
+                String tags, String description, LocalDateTime createdAt) {
     checkArgument(fisherId != null, "fisherId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
     checkArgument(isPrivate != null,"isPrivate must be provided.");
-    checkArgument(category != null, "category must be provided.");
-    checkArgument(description.length() <= 100, "description must be lower than 100");
+    checkArgument(description.length() <= 200, "description must be lower than 200");
 
     this.markerId = markerId;
     this.fisherId = fisherId;
@@ -65,7 +61,6 @@ public class Marker {
     this.latitude = latitude;
     this.longitude = longitude;
     this.isPrivate = isPrivate;
-    this.category = category;
     this.tags = tags;
     this.description = description;
     this.createdAt = defaultIfNull(createdAt, now());
@@ -78,10 +73,6 @@ public class Marker {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public void setCategory(String category) {
-    this.category = category;
   }
 
   public void setTags(String tags) {

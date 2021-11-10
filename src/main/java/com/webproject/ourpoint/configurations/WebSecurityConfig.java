@@ -125,7 +125,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/marker/likes",
                         "/marker/thiscount",
                         "/marker/mylikecount",
-                        "/marker/mylikelist").permitAll()
+                        "/marker/mylikelist",
+                        "/tag/top").permitAll()
                 .antMatchers("/fisher/role/change").hasRole(Role.ADMIN.name())
                 .accessDecisionManager(accessDecisionManager())
                 .anyRequest().permitAll()

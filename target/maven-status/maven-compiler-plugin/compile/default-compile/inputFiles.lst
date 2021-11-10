@@ -12,6 +12,7 @@
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/JwtAuthentication.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/JwtAuthenticationProvider.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/utils/PasswordValidation.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/tag/TagController.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/repository/LikedRepository.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/JwtAuthenticationTokenFilter.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/utils/DateTimeUtils.java
@@ -23,9 +24,11 @@
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/configurations/JwtTokenConfigure.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/ApiError.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/marker/DeleteRequest.java
-/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/marker/Category.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/liked/Liked.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/service/LikeService.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/repository/TagRepository.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/AuthenticationResult.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/service/TagService.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/utils/RedisUtil.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/marker/MarkerController.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/fisher/JoinRequest.java
@@ -36,7 +39,9 @@
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/JwtAccessDeniedHandler.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/utils/MessageUtils.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/user/Fisher.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/common/Tag.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/fisher/ExistRequest.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/tag/TopTagRequest.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/common/Id.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/ApiResult.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/fisher/ChangeRequest.java

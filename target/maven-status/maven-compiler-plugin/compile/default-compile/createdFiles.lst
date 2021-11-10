@@ -1,4 +1,5 @@
 com/webproject/ourpoint/controller/marker/UpdateRequest.class
+com/webproject/ourpoint/service/LikeService.class
 com/webproject/ourpoint/utils/DateTimeUtils.class
 com/webproject/ourpoint/model/marker/Marker.class
 com/webproject/ourpoint/OurpointApplication.class

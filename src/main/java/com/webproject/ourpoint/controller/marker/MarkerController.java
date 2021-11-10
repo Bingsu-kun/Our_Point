@@ -2,9 +2,9 @@ package com.webproject.ourpoint.controller.marker;
 
 import com.webproject.ourpoint.controller.ApiResult;
 import com.webproject.ourpoint.model.liked.Liked;
-import com.webproject.ourpoint.model.marker.Category;
 import com.webproject.ourpoint.model.marker.Marker;
 import com.webproject.ourpoint.security.JwtAuthentication;
+import com.webproject.ourpoint.service.LikeService;
 import com.webproject.ourpoint.service.MarkerService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +20,11 @@ import static com.webproject.ourpoint.controller.ApiResult.OK;
 public class MarkerController {
 
   private final MarkerService markerService;
+  private final LikeService likeService;
 
-  public MarkerController(MarkerService markerService) {
+  public MarkerController(MarkerService markerService, LikeService likeService) {
     this.markerService = markerService;
+    this.likeService = likeService;
   }
 
   @PostMapping(path = "/create")
@@ -34,7 +36,6 @@ public class MarkerController {
             createRequest.getLatitude(),
             createRequest.getLongitude(),
             createRequest.getIsPrivate(),
-            Category.of(createRequest.getCategory()),
             createRequest.getTagString(),
             createRequest.getDescription()
     );
@@ -51,7 +52,6 @@ public class MarkerController {
             updateRequest.getLatitude(),
             updateRequest.getLongitude(),
             updateRequest.getIsPrivate(),
-            Category.of(updateRequest.getCategory()),
             updateRequest.getTagString(),
             updateRequest.getDescription()
     );
@@ -65,35 +65,40 @@ public class MarkerController {
     return OK("deleted");
   }
 
-  @PostMapping(path = "/like")
-  public ApiResult<Liked> like(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody LikeRequest likeRequest) {
-    return OK(markerService.like(authentication.id, likeRequest.getMarkerId()));
+  @GetMapping(path = "/mymarkers")
+  public ApiResult<List<Marker>> myMarkers(@AuthenticationPrincipal JwtAuthentication authentication) {
+    return OK(markerService.myMarkers(authentication.id));
   }
 
-  @PostMapping(path = "/dislike")
+  @PostMapping(path = "/like")
+  public ApiResult<Liked> like(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody LikeRequest likeRequest) {
+    return OK(likeService.like(authentication.id, likeRequest.getMarkerId()));
+  }
+
+  @DeleteMapping(path = "/dislike")
   public ApiResult<String> dislike(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody LikeRequest likeRequest) {
-    markerService.dislike(authentication.id, likeRequest.getMarkerId());
+    likeService.dislike(authentication.id, likeRequest.getMarkerId());
     return OK("deleted");
   }
 
   @PostMapping(path = "/likes")
   public ApiResult<List<Integer>> likes(@RequestBody AllLikedRequest allLikedRequest) {
-    return OK(markerService.allMarkersLikeCount(allLikedRequest.getMarkerIds()));
+    return OK(likeService.allMarkersLikeCount(allLikedRequest.getMarkerIds()));
   }
 
   @PostMapping(path = "/thiscount")
   public ApiResult<Integer> thisMarkerCount(@RequestBody LikeRequest likeRequest) {
-    return OK(markerService.markerLikeCount(likeRequest.getMarkerId()));
+    return OK(likeService.markerLikeCount(likeRequest.getMarkerId()));
   }
 
   @GetMapping(path = "/mylikecount")
   public ApiResult<Integer> myLikeCount(@AuthenticationPrincipal JwtAuthentication authentication) {
-    return OK(markerService.fisherLikeCount(authentication.id));
+    return OK(likeService.fisherLikeCount(authentication.id));
   }
 
   @GetMapping(path = "/mylikelist")
   public ApiResult<List<Marker>> myLikeList(@AuthenticationPrincipal JwtAuthentication authentication) {
-    return OK(markerService.myLikeList(authentication.id));
+    return OK(likeService.myLikeList(authentication.id));
   }
 
   @GetMapping(path = "/all")

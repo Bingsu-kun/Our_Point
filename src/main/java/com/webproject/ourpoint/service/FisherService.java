@@ -1,9 +1,13 @@
 package com.webproject.ourpoint.service;
 
 import com.webproject.ourpoint.model.common.Id;
+import com.webproject.ourpoint.model.liked.Liked;
+import com.webproject.ourpoint.model.marker.Marker;
 import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.model.user.Role;
 import com.webproject.ourpoint.repository.FisherRepository;
+import com.webproject.ourpoint.repository.LikedRepository;
+import com.webproject.ourpoint.repository.MarkerRepository;
 import com.webproject.ourpoint.utils.PasswordValidation;
 import com.webproject.ourpoint.errors.NotFoundException;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,7 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -28,9 +34,15 @@ public class FisherService {
 
     private final FisherRepository fisherRepository;
 
-    public FisherService(PasswordEncoder passwordEncoder, FisherRepository fisherRepository) {
+    private final MarkerRepository markerRepository;
+
+    private final LikedRepository likedRepository;
+
+    public FisherService(PasswordEncoder passwordEncoder, FisherRepository fisherRepository, MarkerRepository markerRepository, LikedRepository likedRepository) {
         this.passwordEncoder = passwordEncoder;
         this.fisherRepository = fisherRepository;
+        this.markerRepository = markerRepository;
+        this.likedRepository = likedRepository;
     }
 
 
@@ -106,6 +118,8 @@ public class FisherService {
         checkArgument(fisher.getEmail().equals(email), "이메일이 일치하지 않습니다.");
         checkArgument(fisher.isPasswordMatch(passwordEncoder, password), "비밀번호가 일치하지 않습니다.",HttpStatus.UNAUTHORIZED);
         fisherRepository.delete(fisher);
+        cascadeLikes(id);
+        cascadeMarkers(id);
     }
 
     // 이 메소드는 관리자 전용입니다.
@@ -161,4 +175,21 @@ public class FisherService {
         return Optional.ofNullable(fisherRepository.findByName(name));
     }
 
+    private void cascadeMarkers(Id<Fisher,Long> id) {
+        List<Marker> markers = markerRepository.findAll();
+        markers.forEach((element) -> {
+            if (Objects.equals(element.getFisherId(), id.value())) {
+                markerRepository.delete(element);
+            }
+        });
+    }
+
+    private void cascadeLikes(Id<Fisher,Long> id) {
+        List<Liked> likeds = likedRepository.findAll();
+        likeds.forEach((element) -> {
+            if (Objects.equals(element.getFisherId(),id.value()) || Objects.equals(element.getMfId(),id.value())) {
+                likedRepository.delete(element);
+            }
+        });
+    }
 }
