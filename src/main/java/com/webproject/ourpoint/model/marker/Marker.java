@@ -35,6 +35,9 @@ public class Marker {
   private String longitude;
 
   @Column(nullable = false)
+  private String place_addr;
+
+  @Column(nullable = false)
   private Boolean isPrivate = false;
 
   private String tags;
@@ -43,11 +46,11 @@ public class Marker {
 
   private LocalDateTime createdAt;
 
-  public Marker(Long fisherId, String name, String latitude, String longitude, Boolean isPrivate, String tags, String description) {
-    this(null,fisherId,name,latitude,longitude,isPrivate,tags,description,now());
+  public Marker(Long fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate, String tags, String description) {
+    this(null,fisherId,name,latitude,longitude,place_addr,isPrivate,tags,description,now());
   }
 
-  public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, Boolean isPrivate,
+  public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
                 String tags, String description, LocalDateTime createdAt) {
     checkArgument(fisherId != null, "fisherId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
@@ -60,6 +63,7 @@ public class Marker {
     this.name = name;
     this.latitude = latitude;
     this.longitude = longitude;
+    this.place_addr = place_addr;
     this.isPrivate = isPrivate;
     this.tags = tags;
     this.description = description;
@@ -69,6 +73,10 @@ public class Marker {
   public void setLatlng(String latitude, String longitude) {
     this.latitude = latitude;
     this.longitude = longitude;
+  }
+
+  public void setPlaceAddr(String place_addr) {
+    this.place_addr = place_addr;
   }
 
   public void setName(String name) {

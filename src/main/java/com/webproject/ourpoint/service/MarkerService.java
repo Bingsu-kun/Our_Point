@@ -31,14 +31,14 @@ public class MarkerService {
 
   //-----------------------------------------------------------------
   @Transactional
-  public Marker createMarker(Id<Fisher,Long> fisherId, String name, String latitude, String longitude, Boolean isPrivate,
+  public Marker createMarker(Id<Fisher,Long> fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
                            String tagString, String description) {
 
     checkArgument(fisherId != null, "fisherId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
 
-    Marker marker = new Marker(fisherId.value(),name,latitude,longitude,isPrivate,trimTagString(tagString),description);
+    Marker marker = new Marker(fisherId.value(),name,latitude,longitude,place_addr,isPrivate,trimTagString(tagString),description);
 
     addTags(tagString);
 
@@ -47,7 +47,7 @@ public class MarkerService {
 
   @Transactional
   @Modifying(clearAutomatically = true)
-  public Marker updateMarker(Id<Fisher,Long> fisherId, Long markerId, Long mfId, String name, String latitude, String longitude,
+  public Marker updateMarker(Id<Fisher,Long> fisherId, Long markerId, Long mfId, String name, String latitude, String longitude, String place_addr,
                                      Boolean isPrivate, String tagString, String description) {
 
     checkArgument(Objects.equals(mfId,fisherId.value()),"you can't update this marker.");
@@ -56,6 +56,7 @@ public class MarkerService {
 
     Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException(Marker.class,markerId));
     marker.setLatlng(latitude,longitude);
+    marker.setPlaceAddr(place_addr);
     marker.setIsPrivate(isPrivate);
     marker.setName(name);
     if (!marker.getTags().equals(trimTagString(tagString))){

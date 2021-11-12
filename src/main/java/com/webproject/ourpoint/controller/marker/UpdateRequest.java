@@ -19,6 +19,8 @@ public class UpdateRequest {
 
   private String longitude;
 
+  private String place_addr;
+
   private Boolean isPrivate;
 
   private String tagString;

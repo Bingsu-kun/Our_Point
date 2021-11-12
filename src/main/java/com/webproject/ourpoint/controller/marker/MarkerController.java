@@ -35,6 +35,7 @@ public class MarkerController {
             createRequest.getName(),
             createRequest.getLatitude(),
             createRequest.getLongitude(),
+            createRequest.getPlace_addr(),
             createRequest.getIsPrivate(),
             createRequest.getTagString(),
             createRequest.getDescription()
@@ -51,6 +52,7 @@ public class MarkerController {
             updateRequest.getName(),
             updateRequest.getLatitude(),
             updateRequest.getLongitude(),
+            updateRequest.getPlace_addr(),
             updateRequest.getIsPrivate(),
             updateRequest.getTagString(),
             updateRequest.getDescription()
