@@ -23,6 +23,7 @@
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/security/AuthenticationRequest.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/configurations/JwtTokenConfigure.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/ApiError.java
+/Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/errors/NotAcceptableException.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/controller/marker/DeleteRequest.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/model/liked/Liked.java
 /Users/hephai/Documents/Modus_Point_dev/Modus_Point_Back/src/main/java/com/webproject/ourpoint/service/LikeService.java

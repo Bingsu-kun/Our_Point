@@ -28,7 +28,7 @@ public class LikeService {
 
   @Transactional
   public Liked like(Id<Fisher, Long> fisherId, Long markerId) {
-    Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException(Marker.class, markerId));
+    Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
     Liked liked = likedRepository.findLikedByIds(fisherId.value(),markerId);
     checkArgument(liked == null, "already liked.");
     return likedRepository.save(new Liked(fisherId.value(), markerId, marker.getFisherId()));
@@ -53,7 +53,7 @@ public class LikeService {
     List<Marker> likeMarkers = new ArrayList<>();
     for (int i = 0; i < likeIds.toArray().length; i++) {
       Liked l = likeIds.get(i);
-      likeMarkers.add(markerRepository.findById(l.getMarkerId()).orElseThrow(() -> new NotFoundException(String.valueOf(l.getMarkerId()), Marker.class)));
+      likeMarkers.add(markerRepository.findById(l.getMarkerId()).orElseThrow(() -> new NotFoundException("찾을 수 없습니다.")));
     }
     return likeMarkers;
   }

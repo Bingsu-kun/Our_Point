@@ -13,6 +13,8 @@ public class JoinRequest {
 
     private String credentials;
 
+    private String profImageName;
+
     private String name;
 
 }

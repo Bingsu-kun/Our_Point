@@ -1,6 +1,7 @@
 package com.webproject.ourpoint.security;
 
 import com.webproject.ourpoint.errors.NotFoundException;
+import com.webproject.ourpoint.errors.UnauthorizedException;
 import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.service.FisherService;
 import com.webproject.ourpoint.utils.RedisUtil;
@@ -73,6 +74,9 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
       String refreshToken = refreshCookie != null ? refreshCookie.getValue() : null;
       // AccessToken 값이 있다면, AccessToken 값을 검증하고 인증정보를 생성해 SecurityContextHolder 에 추가한다.
       // 만약 AccessToken 이 존재한다면
+      if (AccessToken == null && refreshToken == null)
+        throw new UnauthorizedException("unauthorized");
+
       if (AccessToken != null) {
         try {
           Jwt.Claims AccessClaims = verify(AccessToken);
@@ -205,7 +209,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
 
       if (isRefresh) {
         //refresh 권한이 확인되면 AccessToken을 Header에 담아 보냄.
-        Fisher fisher = fisherService.findByEmail(email).orElseThrow(() -> new NotFoundException(Fisher.class, email));
+        Fisher fisher = fisherService.findByEmail(email).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
         String newAccessToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
         response.setHeader(headerKey, newAccessToken);
       }

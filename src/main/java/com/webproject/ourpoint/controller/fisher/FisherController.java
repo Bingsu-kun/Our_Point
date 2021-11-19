@@ -3,6 +3,7 @@ package com.webproject.ourpoint.controller.fisher;
 import com.webproject.ourpoint.controller.ApiResult;
 import com.webproject.ourpoint.errors.NotFoundException;
 import com.webproject.ourpoint.errors.UnauthorizedException;
+import com.webproject.ourpoint.model.common.Id;
 import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.security.*;
 import com.webproject.ourpoint.service.FisherService;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import static com.webproject.ourpoint.controller.ApiResult.ERROR;
 import static com.webproject.ourpoint.controller.ApiResult.OK;
 import static com.webproject.ourpoint.utils.CookieUtil.createCookie;
+import static com.webproject.ourpoint.utils.EmailFormatValidation.checkAddress;
 
 @CrossOrigin(origins = {"http://localhost:8080", "http://172.31.44.156:8080", "https://172.31.44.156:8080"})
 @RestController
@@ -48,11 +50,12 @@ public class FisherController {
     Fisher fisher = fisherService.join(
             joinRequest.getPrincipal(),
             joinRequest.getCredentials(),
+            joinRequest.getProfImageName(),
             joinRequest.getName()
     );
     String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
     String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
-    redisUtil.setData(fisher.getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+    redisUtil.setData(fisher.getFisherName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
     Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
     refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
     refreshCookie.setHttpOnly(true);
@@ -66,6 +69,8 @@ public class FisherController {
 
     if (fisherService.findByEmail(request).isPresent())
       return ERROR("이메일 중복",HttpStatus.CONFLICT);
+    else if (!checkAddress(request))
+      return ERROR("이메일 형식 오류",HttpStatus.BAD_REQUEST);
     else
       return OK("available");
   }
@@ -76,6 +81,8 @@ public class FisherController {
 
     if (fisherService.findByName(request).isPresent())
       return ERROR("닉네임 중복",HttpStatus.CONFLICT);
+    else if (request.length() < 2 || request.length() > 10)
+      return ERROR("닉네임 길이 오류",HttpStatus.BAD_REQUEST);
     else
       return OK("available");
   }
@@ -90,7 +97,7 @@ public class FisherController {
       AuthenticationResult result = (AuthenticationResult) authentication.getDetails();
 
       String refreshToken = result.getFisher().newRefreshToken(jwt, new String[]{result.getFisher().getRole()});
-      redisUtil.setData(result.getFisher().getFishername(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+      redisUtil.setData(result.getFisher().getFisherName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
       Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
       refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
       refreshCookie.setHttpOnly(true);
@@ -103,14 +110,14 @@ public class FisherController {
 
   @GetMapping(path = "/me")
   public ApiResult<FisherDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
-    Fisher fisher = fisherService.findById(authentication.id).orElseThrow(() -> new NotFoundException(Fisher.class, authentication.id));
+    Fisher fisher = fisherService.findById(authentication.id).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
     return  OK(new FisherDto(fisher));
   }
 
   @PutMapping(path = "/me/name/change")
   public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
     return OK(
-            new FisherDto(fisherService.changeName(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+            new FisherDto(fisherService.changeName(authentication.id, changeRequest.getChangeValue()))
     );
   }
 
@@ -132,6 +139,11 @@ public class FisherController {
   public ApiResult<?> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody AuthenticationRequest authRequest) {
     fisherService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
     return  OK("deleted");
+  }
+
+  @GetMapping(path = "/{fisherId}")
+  public ApiResult<FisherDto> getFisher(@PathVariable(value = "fisherId", required = false) Long fisherId) {
+    return OK(new FisherDto(fisherService.findById(Id.of(Fisher.class, fisherId)).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."))));
   }
 
 }

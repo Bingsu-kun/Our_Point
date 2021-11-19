@@ -45,7 +45,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
       JwtAuthenticationToken authenticated =
         // 응답용 Authentication 인스턴스를 생성한다.
         // JwtAuthenticationToken.principal 부분에는 JwtAuthentication 인스턴스가 set 된다.
-        new JwtAuthenticationToken(new JwtAuthentication(fisher.getId(), fisher.getFishername(), fisher.getEmail()), null, createAuthorityList(fisher.getRole()));
+        new JwtAuthenticationToken(new JwtAuthentication(fisher.getId(), fisher.getFisherName(), fisher.getEmail()), null, createAuthorityList(fisher.getRole()));
       // JWT 값을 생성한다.
       String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
       authenticated.setDetails(new AuthenticationResult(apiToken, fisher));

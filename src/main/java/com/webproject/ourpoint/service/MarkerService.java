@@ -1,6 +1,7 @@
 package com.webproject.ourpoint.service;
 
 import com.webproject.ourpoint.errors.NotFoundException;
+import com.webproject.ourpoint.errors.UnauthorizedException;
 import com.webproject.ourpoint.model.common.Id;
 import com.webproject.ourpoint.model.common.Tag;
 import com.webproject.ourpoint.model.liked.Liked;
@@ -9,6 +10,7 @@ import com.webproject.ourpoint.model.user.Fisher;
 import com.webproject.ourpoint.repository.LikedRepository;
 import com.webproject.ourpoint.repository.MarkerRepository;
 import com.webproject.ourpoint.repository.TagRepository;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +48,6 @@ public class MarkerService {
   }
 
   @Transactional
-  @Modifying(clearAutomatically = true)
   public Marker updateMarker(Id<Fisher,Long> fisherId, Long markerId, Long mfId, String name, String latitude, String longitude, String place_addr,
                                      Boolean isPrivate, String tagString, String description) {
 
@@ -54,14 +55,14 @@ public class MarkerService {
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
 
-    Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException(Marker.class,markerId));
+    Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
     marker.setLatlng(latitude,longitude);
     marker.setPlaceAddr(place_addr);
     marker.setIsPrivate(isPrivate);
     marker.setName(name);
     if (!marker.getTags().equals(trimTagString(tagString))){
-      marker.setTags(trimTagString(tagString));
       updateTags(marker.getTags(), trimTagString(tagString));
+      marker.setTags(trimTagString(tagString));
     }
     marker.setDescription(description);
 
@@ -70,7 +71,11 @@ public class MarkerService {
 
   @Transactional
   public void deleteMarker(Id<Fisher, Long> fisherId, Long markerId, Long mfId) {
-    checkArgument(Objects.equals(mfId, fisherId.value()) || fisherId.value() == 1,"you can't delete this marker.");
+    try {
+      checkArgument(Objects.equals(mfId, fisherId.value()) || fisherId.value() == 1, "you can't delete this marker.");
+    } catch (Exception e) {
+      throw new UnauthorizedException("you can't delete this marker.");
+    }
     Marker currentMarker = markerRepository.getById(markerId);
     markerRepository.delete(currentMarker);
     decreaseTags(currentMarker.getTags());
@@ -130,7 +135,7 @@ public class MarkerService {
 
   private void decreaseTags(String tagString) {
     for (String tag : trimTagString(tagString).replaceAll("#","").split(" ")) {
-      Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException(Tag.class, tag));
+      Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
       savedTag.decreaseUsed();
       if (savedTag.getUsed() == 0) {
         tagRepository.delete(savedTag);
@@ -142,20 +147,22 @@ public class MarkerService {
   }
 
   private void updateTags(String beforeTag, String afterTag) {
-    List<String> bTags = Arrays.asList(beforeTag.replaceAll("#", "").split(" "));
-    List<String> aTags = Arrays.asList(afterTag.replaceAll("#", "").split(" "));
+    String[] bTags = beforeTag.replaceAll("#", "").split(" ");
+    String[] aTags = afterTag.replaceAll("#", "").split(" ");
 
-    for (String tag : bTags) {
-      if (!afterTag.matches(tag)) {
+    // 업데이트 하면서 새로 생긴 태그들 만들거나 사용 횟수 증가
+    for (String tag : aTags) {
+      if (!beforeTag.contains(tag)) {
         Tag savedTag = tagRepository.findByTag(tag).orElse(new Tag(tag));
         savedTag.addUsed();
         tagRepository.save(savedTag);
       }
     }
 
-    for (String tag : aTags) {
-      if (!beforeTag.matches(tag)) {
-        Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException(Tag.class, tag));
+    // 업데이트 하면서 사라진 태그들 지우거나 사용 횟수 감소 (만약 0 이면 지움)
+    for (String tag : bTags) {
+      if (!afterTag.contains(tag)) {
+        Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
         savedTag.decreaseUsed();
         if (savedTag.getUsed() == 0) {
           tagRepository.delete(savedTag);

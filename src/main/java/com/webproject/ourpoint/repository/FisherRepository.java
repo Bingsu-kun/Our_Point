@@ -12,7 +12,7 @@ public interface FisherRepository extends JpaRepository<Fisher, Long> {
     @Query(value = "SELECT * FROM fisher WHERE email = :email",nativeQuery = true)
     Fisher findByEmail(@Param("email") String email);
 
-    @Query(value = "SELECT * FROM fisher WHERE fishername = :fishername", nativeQuery = true)
-    Fisher findByName(@Param("fishername") String fishername);
+    @Query(value = "SELECT * FROM fisher WHERE fisher_name = :fisherName", nativeQuery = true)
+    Fisher findByName(@Param("fisherName") String fisherName);
 
 }

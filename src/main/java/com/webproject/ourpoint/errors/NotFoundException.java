@@ -2,19 +2,18 @@ package com.webproject.ourpoint.errors;
 
 import com.webproject.ourpoint.utils.MessageUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
+@ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Data Not Found")
 public class NotFoundException extends ServiceRuntimeException {
 
-    static final String MESSAGE_KEY = "error.notfound";
+    public static final String MESSAGE_KEY = "error.notfound";
 
-    static final String MESSAGE_DETAILS = "error.notfound.details";
+    public static final String MESSAGE_DETAIL = "error.notfound.details";
 
-    public NotFoundException(Class<?> cls, Object... values) {
-        this(cls.getSimpleName(), values);
-    }
-
-    public NotFoundException(String targetName, Object... values) {
-        super(MESSAGE_KEY, MESSAGE_DETAILS, new String[]{targetName, (values != null && values.length > 0) ? StringUtils.join(values, ",") : ""});
+    public NotFoundException(String message) {
+        super(MESSAGE_KEY, MESSAGE_DETAIL, new Object[]{message});
     }
 
     @Override

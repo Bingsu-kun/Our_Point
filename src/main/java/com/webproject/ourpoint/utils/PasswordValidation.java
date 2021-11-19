@@ -1,5 +1,6 @@
 package com.webproject.ourpoint.utils;
 
+import com.webproject.ourpoint.errors.NotAcceptableException;
 import org.springframework.http.HttpStatus;
 
 import java.util.regex.Matcher;
@@ -11,7 +12,7 @@ public class PasswordValidation {
 
     public static boolean isValidPassword(String password) {
         // 최소 8자, 최대 20자 상수 선언
-        final int MIN = 6;
+        final int MIN = 8;
         final int MAX = 20;
 
         // 영어, 숫자, 특수문자 포함한 MIN to MAX 글자 정규식
@@ -47,7 +48,6 @@ public class PasswordValidation {
         // 동일한 문자 3개 이상 체크
         matcher = Pattern.compile(SAMEPT).matcher(tmpPw);
         checkArgument(!matcher.find(), "Detected: Same Word x3.", HttpStatus.NOT_ACCEPTABLE);
-
         // 연속된 문자 / 숫자 3개 이상 체크
 
         // ASCII Char를 담을 배열 선언
@@ -69,6 +69,7 @@ public class PasswordValidation {
                 // 3번째 글자 - 2번째 글자 = 1, 3번째 글자 - 1번째 글자 = 2
                 checkArgument(!(Math.abs(tmpArray[i + 2] - tmpArray[i + 1]) == 1
                         && Math.abs(tmpArray[i + 2] - tmpArray[i]) == 2), "Detected: Continuous Pattern.", HttpStatus.NOT_ACCEPTABLE);
+
             }
         }
 

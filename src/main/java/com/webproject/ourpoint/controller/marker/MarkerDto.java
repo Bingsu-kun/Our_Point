@@ -27,9 +27,9 @@ public class MarkerDto {
 
   private String longitude;
 
-  private Boolean isPrivate;
+  private String place_addr;
 
-  private String category;
+  private Boolean isPrivate;
 
   private String tags;
 
