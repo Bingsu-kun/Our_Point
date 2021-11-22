@@ -1,22 +1,22 @@
 spring:
   datasource:
-#    url: jdbc:postgresql://172.17.0.3:5432/postgres
-#    password: dlduwls0822!
+    url: jdbc:postgresql://172.17.0.3:5432/postgres
+    password: dlduwls0822!
     driver-class-name: org.postgresql.Driver
     username: postgres
-    url: jdbc:postgresql://localhost:5432/postgres
-    password: 1018
+#    url: jdbc:postgresql://localhost:5432/postgres
+#    password: 1018
   jpa:
     show-sql: true
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: create
+      ddl-auto: update
   cache:
     type: redis
   redis:
-#    host: 172.17.0.2
-    host: localhost
+    host: 172.17.0.2
+#    host: localhost
     port: 6379
 server:
   port: 8080
@@ -34,4 +34,4 @@ jwt:
     header: Authorization
     issuer: Flare_Point
     clientSecret: aa64eb33e4701c204be9ca4b16c488eee31ae31cb561b1f5f50f6c7b63d14cb1
-    expirySeconds: 3600
+    expirySeconds: 10800
