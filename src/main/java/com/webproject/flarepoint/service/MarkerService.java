@@ -49,7 +49,11 @@ public class MarkerService {
   public Marker updateMarker(Id<Fisher,Long> fisherId, Long markerId, Long mfId, String name, String latitude, String longitude, String place_addr,
                                      Boolean isPrivate, String tagString, String description) {
 
-    checkArgument(Objects.equals(mfId,fisherId.value()),"you can't update this marker.");
+    try {
+      checkArgument(Objects.equals(mfId, fisherId.value()), "you can't update this marker.");
+    } catch (Exception e) {
+      throw new UnauthorizedException("auth failed.");
+    }
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
 
@@ -116,11 +120,13 @@ public class MarkerService {
 
   private void cascadeLikes(Long markerId) {
     List<Liked> likeds = likedRepository.findAll();
-    likeds.forEach((element) -> {
-      if (Objects.equals(element.getMarkerId(),markerId)) {
-        likedRepository.delete(element);
-      }
-    });
+    if (!likeds.isEmpty()) {
+      likeds.forEach((element) -> {
+        if (Objects.equals(element.getMarkerId(), markerId)) {
+          likedRepository.delete(element);
+        }
+      });
+    }
   }
 
   private void addTags(String tagString) {
