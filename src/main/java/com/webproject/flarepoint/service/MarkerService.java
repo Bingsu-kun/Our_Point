@@ -118,6 +118,7 @@ public class MarkerService {
     return result.toString();
   }
 
+  @Transactional
   private void cascadeLikes(Long markerId) {
     List<Liked> likeds = likedRepository.findAll();
     if (!likeds.isEmpty()) {
@@ -129,6 +130,7 @@ public class MarkerService {
     }
   }
 
+  @Transactional
   private void addTags(String tagString) {
     for (String tag : trimTagString(tagString).replaceAll("#","").split(" ")) {
       Tag savedTag = tagRepository.findByTag(tag).orElse(new Tag(tag));
@@ -137,6 +139,7 @@ public class MarkerService {
     }
   }
 
+  @Transactional
   private void decreaseTags(String tagString) {
     for (String tag : trimTagString(tagString).replaceAll("#","").split(" ")) {
       Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
@@ -150,6 +153,7 @@ public class MarkerService {
     }
   }
 
+  @Transactional
   private void updateTags(String beforeTag, String afterTag) {
     String[] bTags = beforeTag.replaceAll("#", "").split(" ");
     String[] aTags = afterTag.replaceAll("#", "").split(" ");
