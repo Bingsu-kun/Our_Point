@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = { "http://localhost:8080", "http://172.30.1.30:8080" })
+@CrossOrigin(origins = { "http://localhost:8080","https://localhost:8080","https://flarepoint.netlify.app" })
 @RestController
 @RequestMapping("/tag")
 public class TagController {
@@ -18,10 +18,15 @@ public class TagController {
     this.tagService = tagService;
   }
 
-  @PostMapping(path = "/top")
-  public ApiResult<List<Tag>> getTopTags(@RequestBody TopTagRequest topTagRequest) {
-    List<Tag> tags = tagService.getTopTags(topTagRequest.getCount());
+  @GetMapping(path = "/top/{count}")
+  public ApiResult<List<Tag>> getTopTags(@PathVariable(value = "count") int count) {
+    List<Tag> tags = tagService.getTopTags(count);
     return ApiResult.OK(tags);
+  }
+
+  @GetMapping(path = "/all")
+  public ApiResult<List<Tag>> getAllTags() {
+    return ApiResult.OK(tagService.getAllTags());
   }
 
 }

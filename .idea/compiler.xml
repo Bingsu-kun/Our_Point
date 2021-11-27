@@ -8,12 +8,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Flare_Point_Back" />
+        <module name="Flare_Point" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.6" />
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Flare_Point" options="-parameters" />
       <module name="Flare_Point_Back" options="-parameters" />
       <module name="Modus_Point_Back" options="-parameters" />
       <module name="Our_Point" options="-parameters" />

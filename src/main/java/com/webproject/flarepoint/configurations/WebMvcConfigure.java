@@ -14,7 +14,7 @@ public class WebMvcConfigure implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
     registry
             .addMapping("/**")
-            .allowedOrigins("http://localhost:8080","http://172.30.1.30:8080","https://localhost:8080")
+            .allowedOrigins("http://localhost:8080","https://localhost:8080","https://flarepoint.netlify.app")
             .allowedMethods("*")
             .exposedHeaders("*","Authorization")
             .maxAge(10800)

@@ -24,7 +24,7 @@ import static com.webproject.flarepoint.controller.ApiResult.OK;
 import static com.webproject.flarepoint.utils.CookieUtil.createCookie;
 import static com.webproject.flarepoint.utils.EmailFormatValidation.checkAddress;
 
-@CrossOrigin(origins = { "http://localhost:8080", "http://172.30.1.30:8080" })
+@CrossOrigin(origins = { "http://localhost:8080","https://localhost:8080","https://flarepoint.netlify.app" })
 @RestController
 @RequestMapping("/fisher")
 public class FisherController {

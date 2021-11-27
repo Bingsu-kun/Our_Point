@@ -32,7 +32,6 @@ com/webproject/flarepoint/configurations/WebSecurityConfig.class
 com/webproject/flarepoint/service/MarkerService.class
 com/webproject/flarepoint/repository/FisherRepository.class
 com/webproject/flarepoint/security/AuthenticationRequest.class
-com/webproject/flarepoint/controller/tag/TopTagRequest.class
 com/webproject/flarepoint/model/liked/Liked$LikedBuilder.class
 com/webproject/flarepoint/repository/MarkerRepository.class
 com/webproject/flarepoint/model/user/Fisher$FisherBuilder.class

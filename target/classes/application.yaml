@@ -11,7 +11,7 @@ spring:
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
+      ddl-auto: create
   cache:
     type: redis
   redis:
@@ -21,14 +21,14 @@ spring:
 server:
   port: 8080
 #  HTTPS SSL를 시도했던 흔적들
-#  ssl:
-#    enabled: true
-#    key-alias: flarepointSSL
-#    key-store: fpkeystore.pkcs12
-#    key-store-password: 'dlduwls0822!'
-#    key-password: 'dlduwls0822!'
-#    trust-store: fptrust.pkcs12
-#    trust-store-password: 'dlduwls0822!'
+  ssl:
+    enabled: true
+    key-alias: flarepointSSL
+    key-store: fpkeystore.pkcs12
+    key-store-password: 'dlduwls0822!'
+    key-password: 'dlduwls0822!'
+    trust-store: fptrust.pkcs12
+    trust-store-password: 'dlduwls0822!'
 jwt:
   token:
     header: Authorization
