@@ -19,16 +19,14 @@ spring:
 #    host: localhost
     port: 6379
 server:
-  port: 8080
+  port: 443
 #  HTTPS SSL를 시도했던 흔적들
   ssl:
     enabled: true
-    key-alias: flarepointSSL
     key-store: fpkeystore.pkcs12
+    key-store-type: PKCS12
     key-store-password: 'dlduwls0822!'
     key-password: 'dlduwls0822!'
-    trust-store: fptrust.pkcs12
-    trust-store-password: 'dlduwls0822!'
 jwt:
   token:
     header: Authorization
