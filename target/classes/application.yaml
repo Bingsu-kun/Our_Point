@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://172.17.0.3:5432/postgres
+    url: jdbc:postgresql://3.34.252.182:5432/postgres
     password: dlduwls0822!
     driver-class-name: org.postgresql.Driver
     username: postgres
@@ -11,22 +11,22 @@ spring:
     hibernate:
       format-sql: true
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: create
+      ddl-auto: update
   cache:
     type: redis
   redis:
-    host: 172.17.0.2
+    host: 3.34.252.182
 #    host: localhost
     port: 6379
 server:
   port: 443
 #  HTTPS SSL를 시도했던 흔적들
-  ssl:
-    enabled: true
-    key-store: fpkeystore.pkcs12
-    key-store-type: PKCS12
-    key-store-password: 'dlduwls0822!'
-    key-password: 'dlduwls0822!'
+#  ssl:
+#    enabled: true
+#    key-store: fpkeystore.pkcs12
+#    key-store-type: PKCS12
+#    key-store-password: 'dlduwls0822!'
+#    key-password: 'dlduwls0822!'
 jwt:
   token:
     header: Authorization
