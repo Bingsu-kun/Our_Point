@@ -1,6 +1,6 @@
 package com.webproject.flarepoint.security;
 
-import com.webproject.flarepoint.model.user.Fisher;
+import com.webproject.flarepoint.model.user.User;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -12,14 +12,14 @@ public class AuthenticationResult {
 
   private final String apiToken;
 
-  private final Fisher fisher;
+  private final User user;
 
-  public AuthenticationResult(String apiToken, Fisher fisher) {
+  public AuthenticationResult(String apiToken, User user) {
     checkArgument(apiToken != null, "apiToken must be provided.");
-    checkArgument(fisher != null, "user must be provided.");
+    checkArgument(user != null, "user must be provided.");
 
     this.apiToken = apiToken;
-    this.fisher = fisher;
+    this.user = user;
   }
 
 }

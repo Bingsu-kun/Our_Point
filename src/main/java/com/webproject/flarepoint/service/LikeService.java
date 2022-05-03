@@ -4,7 +4,7 @@ import com.webproject.flarepoint.errors.NotFoundException;
 import com.webproject.flarepoint.model.common.Id;
 import com.webproject.flarepoint.model.liked.Liked;
 import com.webproject.flarepoint.model.marker.Marker;
-import com.webproject.flarepoint.model.user.Fisher;
+import com.webproject.flarepoint.model.user.User;
 import com.webproject.flarepoint.repository.LikedRepository;
 import com.webproject.flarepoint.repository.MarkerRepository;
 import org.springframework.stereotype.Service;
@@ -27,29 +27,29 @@ public class LikeService {
   }
 
   @Transactional
-  public Liked like(Id<Fisher, Long> fisherId, Long markerId) {
+  public Liked like(Id<User, Long> userId, Long markerId) {
     Marker marker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
-    Liked liked = likedRepository.findLikedByIds(fisherId.value(),markerId);
+    Liked liked = likedRepository.findByUserIdAndMarkerId(userId.value(),markerId);
     checkArgument(liked == null, "already liked.");
-    return likedRepository.save(new Liked(fisherId.value(), markerId, marker.getFisherId()));
+    return likedRepository.save(new Liked(userId.value(), markerId, marker.getUserId()));
   }
 
   @Transactional
-  public void dislike(Id<Fisher, Long> fisherId, Long markerId) {
-    Liked liked = likedRepository.findLikedByIds(fisherId.value(),markerId);
+  public void dislike(Id<User, Long> userId, Long markerId) {
+    Liked liked = likedRepository.findByUserIdAndMarkerId(userId.value(),markerId);
     checkArgument(liked != null, "already disliked.");
     likedRepository.delete(liked);
   }
 
   @Transactional(readOnly = true)
-  public int fisherLikeCount(Id<Fisher, Long> fisherId) {
-    List<Liked> liked = likedRepository.findLikedByFisherId(fisherId.value());
+  public int userLikeCount(Id<User, Long> userId) {
+    List<Liked> liked = likedRepository.findByUserId(userId.value());
     return liked.toArray().length;
   }
 
   @Transactional(readOnly = true)
-  public List<Marker> myLikeList(Id<Fisher, Long> fisherId) {
-    List<Liked> likeIds = likedRepository.findLikedByFisherId(fisherId.value());
+  public List<Marker> myLikeList(Id<User, Long> userId) {
+    List<Liked> likeIds = likedRepository.findByUserId(userId.value());
     List<Marker> likeMarkers = new ArrayList<>();
     for (int i = 0; i < likeIds.toArray().length; i++) {
       Liked l = likeIds.get(i);
@@ -60,7 +60,7 @@ public class LikeService {
 
   @Transactional(readOnly = true)
   public int markerLikeCount(Long markerId) {
-    List<Liked> liked = likedRepository.findLikedByMarkerId(markerId);
+    List<Liked> liked = likedRepository.findByMarkerId(markerId);
     return liked.toArray().length;
   }
 

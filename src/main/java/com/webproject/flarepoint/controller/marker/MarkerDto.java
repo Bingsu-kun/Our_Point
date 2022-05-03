@@ -18,7 +18,7 @@ public class MarkerDto {
 
   private Long markerId;
 
-  private Long fisherId;
+  private Long userId;
 
   private String name;
 

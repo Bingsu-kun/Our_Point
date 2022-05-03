@@ -3,7 +3,7 @@ package com.webproject.flarepoint.configurations;
 
 import com.webproject.flarepoint.model.user.Role;
 import com.webproject.flarepoint.security.*;
-import com.webproject.flarepoint.service.FisherService;
+import com.webproject.flarepoint.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -78,8 +78,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public JwtAuthenticationProvider jwtAuthenticationProvider(Jwt jwt, FisherService fisherService) {
-        return new JwtAuthenticationProvider(jwt, fisherService);
+    public JwtAuthenticationProvider jwtAuthenticationProvider(Jwt jwt, UserService userService) {
+        return new JwtAuthenticationProvider(jwt, userService);
     }
 
     @Bean
@@ -121,13 +121,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .authorizeRequests()
                 // API에 맞춰서 antMatchers 작성.
-                .antMatchers("/fisher/join",
-                        "/fisher/join/email/exists",
-                        "/fisher/join/name/exists",
-                        "/fisher/me",
-                        "/fisher/login",
-                        "/fisher/me/name/change",
-                        "/fisher/me/password/change",
+                .antMatchers("/user/join",
+                        "/user/join/email/exists",
+                        "/user/join/name/exists",
+                        "/user/me",
+                        "/user/login",
+                        "/user/me/name/change",
+                        "/user/me/password/change",
                         "/marker/create",
                         "/marker/update",
                         "/marker/delete",
@@ -139,12 +139,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/marker/mylikecount",
                         "/marker/mylikelist",
                         "/tag/top").permitAll()
-                .antMatchers("/fisher/role/change").hasRole(Role.ADMIN.name())
+                .antMatchers("/user/role/change").hasRole(Role.ADMIN.name())
                 .accessDecisionManager(accessDecisionManager())
                 .anyRequest().permitAll()
                 .and()
             .logout()
-                .logoutRequestMatcher(new AntPathRequestMatcher("/fisher/logout"))
+                .logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
                 .and()
             // JWT 인증을 사용하므로 form 로그인 비활성
             .formLogin()

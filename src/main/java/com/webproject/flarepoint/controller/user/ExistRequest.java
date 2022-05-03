@@ -1,4 +1,4 @@
-package com.webproject.flarepoint.controller.fisher;
+package com.webproject.flarepoint.controller.user;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

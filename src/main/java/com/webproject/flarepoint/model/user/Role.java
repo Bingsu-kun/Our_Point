@@ -2,7 +2,7 @@ package com.webproject.flarepoint.model.user;
 
 public enum Role {
 
-    ADMIN("ROLE_ADMIN"),FISHER("ROLE_FISHER"),GOODFISHER("ROLE_GOODFISHER"),GREATFISHER("ROLE_GREATFISHER");
+    ADMIN("ROLE_ADMIN"),USER("ROLE_USER"),GOODUSER("ROLE_GOODUSER"),GREATUSER("ROLE_GREATUSER");
 
     private final String value;
 

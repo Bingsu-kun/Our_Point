@@ -1,8 +1,8 @@
 package com.webproject.flarepoint.security;
 
 import com.webproject.flarepoint.errors.NotFoundException;
-import com.webproject.flarepoint.model.user.Fisher;
-import com.webproject.flarepoint.service.FisherService;
+import com.webproject.flarepoint.model.user.User;
+import com.webproject.flarepoint.service.UserService;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -19,11 +19,11 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
   private final Jwt jwt;
 
-  private final FisherService fisherService;
+  private final UserService userService;
 
-  public JwtAuthenticationProvider(Jwt jwt, FisherService fisherService) {
+  public JwtAuthenticationProvider(Jwt jwt, UserService userService) {
     this.jwt = jwt;
-    this.fisherService = fisherService;
+    this.userService = userService;
   }
 
   // true를 리턴하면 Provider에서 인증처리 가능함을 의미. JwtAuthenticationToken 타입처리 가능
@@ -41,16 +41,16 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
   private Authentication processUserAuthentication(AuthenticationRequest request) {
     try {
-      Fisher fisher = fisherService.login(request.getPrincipal(), request.getCredentials());
+      User user = userService.login(request.getPrincipal(), request.getCredentials());
       JwtAuthenticationToken authenticated =
         // 응답용 Authentication 인스턴스를 생성한다.
         // JwtAuthenticationToken.principal 부분에는 JwtAuthentication 인스턴스가 set 된다.
-        new JwtAuthenticationToken(new JwtAuthentication(fisher.getId(), fisher.getFisherName(), fisher.getEmail()), null, createAuthorityList(fisher.getRole()));
+        new JwtAuthenticationToken(new JwtAuthentication(user.getId(), user.getUserName(), user.getEmail()), null, createAuthorityList(user.getRole()));
       // JWT 값을 생성한다.
-      String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-      authenticated.setDetails(new AuthenticationResult(apiToken, fisher));
-      String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
-      authenticated.setDetails(new AuthenticationResult(refreshToken, fisher));
+      String apiToken = user.newApiToken(jwt, new String[]{user.getRole()});
+      authenticated.setDetails(new AuthenticationResult(apiToken, user));
+      String refreshToken = user.newRefreshToken(jwt, new String[]{user.getRole()});
+      authenticated.setDetails(new AuthenticationResult(refreshToken, user));
       return authenticated;
     } catch (NotFoundException e) {
       throw new UsernameNotFoundException(e.getMessage());

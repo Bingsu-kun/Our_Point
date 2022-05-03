@@ -1,6 +1,6 @@
-package com.webproject.flarepoint.controller.fisher;
+package com.webproject.flarepoint.controller.user;
 
-import com.webproject.flarepoint.model.user.Fisher;
+import com.webproject.flarepoint.model.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import static org.springframework.beans.BeanUtils.copyProperties;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FisherDto {
+public class UserDto {
 
     private Long id;
 
@@ -22,7 +22,7 @@ public class FisherDto {
 
     private String profImageName;
 
-    private String fisherName;
+    private String userName;
 
     private String role;
 
@@ -30,7 +30,7 @@ public class FisherDto {
 
     private LocalDateTime createdAt;
 
-    public FisherDto(Fisher source) {
+    public UserDto(User source) {
         copyProperties(source, this);
 
         this.lastLoginAt = source.getLastLoginAt().orElse(null);

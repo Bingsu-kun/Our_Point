@@ -1,9 +1,8 @@
 package com.webproject.flarepoint.security;
 
 import com.webproject.flarepoint.errors.NotFoundException;
-import com.webproject.flarepoint.errors.UnauthorizedException;
-import com.webproject.flarepoint.model.user.Fisher;
-import com.webproject.flarepoint.service.FisherService;
+import com.webproject.flarepoint.model.user.User;
+import com.webproject.flarepoint.service.UserService;
 import com.webproject.flarepoint.utils.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,7 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
   private final Jwt jwt;
 
   @Autowired
-  private FisherService fisherService;
+  private UserService userService;
 
   @Autowired
   private RedisUtil redisUtil;
@@ -207,8 +206,8 @@ public class JwtAuthenticationTokenFilter extends GenericFilterBean {
 
       if (isRefresh) {
         //refresh 권한이 확인되면 AccessToken을 Header에 담아 보냄.
-        Fisher fisher = fisherService.findByEmail(email).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
-        String newAccessToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
+        User user = userService.findByEmail(email).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
+        String newAccessToken = user.newApiToken(jwt, new String[]{user.getRole()});
         response.setHeader(headerKey, newAccessToken);
       }
     }

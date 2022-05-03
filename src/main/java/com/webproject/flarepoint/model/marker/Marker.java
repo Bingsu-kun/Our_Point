@@ -23,7 +23,7 @@ public class Marker {
   private Long markerId;
 
   @Column(nullable = false)
-  private Long fisherId;
+  private Long userId;
 
   private String name;
 
@@ -45,20 +45,20 @@ public class Marker {
 
   private LocalDateTime createdAt;
 
-  public Marker(Long fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate, String tags, String description) {
-    this(null,fisherId,name,latitude,longitude,place_addr,isPrivate,tags,description,now());
+  public Marker(Long userId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate, String tags, String description) {
+    this(null, userId,name,latitude,longitude,place_addr,isPrivate,tags,description,now());
   }
 
-  public Marker(Long markerId, Long fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
+  public Marker(Long markerId, Long userId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
                 String tags, String description, LocalDateTime createdAt) {
-    checkArgument(fisherId != null, "fisherId must be provided.");
+    checkArgument(userId != null, "userId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
     checkArgument(isPrivate != null,"isPrivate must be provided.");
     checkArgument(description.length() <= 200, "description must be lower than 200");
 
     this.markerId = markerId;
-    this.fisherId = fisherId;
+    this.userId = userId;
     this.name = name;
     this.latitude = latitude;
     this.longitude = longitude;

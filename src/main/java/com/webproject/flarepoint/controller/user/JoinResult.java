@@ -1,4 +1,4 @@
-package com.webproject.flarepoint.controller.fisher;
+package com.webproject.flarepoint.controller.user;
 
 import lombok.Getter;
 import lombok.ToString;
@@ -11,14 +11,14 @@ public class JoinResult {
 
     private final String apiToken;
 
-    private final FisherDto fisher;
+    private final UserDto userDto;
 
-    public JoinResult(String apiToken, FisherDto fisher) {
+    public JoinResult(String apiToken, UserDto userDto) {
         checkArgument(apiToken != null, "apiToken must be provided.");
-        checkArgument(fisher != null, "user must be provided.");
+        checkArgument(userDto != null, "user must be provided.");
 
         this.apiToken = apiToken;
-        this.fisher = fisher;
+        this.userDto = userDto;
     }
 
 }

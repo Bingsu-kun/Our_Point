@@ -10,13 +10,10 @@ import java.util.List;
 @Repository
 public interface LikedRepository extends JpaRepository<Liked, Long> {
 
-  @Query(value = "SELECT * FROM liked WHERE mf_id = :fisherId",nativeQuery = true)
-  List<Liked> findLikedByFisherId(Long fisherId);
+  List<Liked> findByUserId(Long userId);
 
-  @Query(value = "SELECT * FROM liked WHERE marker_id = :markerId", nativeQuery = true)
-  List<Liked> findLikedByMarkerId(Long markerId);
+  List<Liked> findByMarkerId(Long markerId);
 
-  @Query(value = "SELECT * FROM liked WHERE fisher_id = :fisherId AND marker_id = :markerId",nativeQuery = true)
-  Liked findLikedByIds(Long fisherId, Long markerId);
+  Liked findByUserIdAndMarkerId(Long userId, Long markerId);
 
 }

@@ -95,7 +95,7 @@ public class MarkerController {
 
   @GetMapping(path = "/mylikecount")
   public ApiResult<Integer> myLikeCount(@AuthenticationPrincipal JwtAuthentication authentication) {
-    return OK(likeService.fisherLikeCount(authentication.id));
+    return OK(likeService.userLikeCount(authentication.id));
   }
 
   @GetMapping(path = "/mylikelist")

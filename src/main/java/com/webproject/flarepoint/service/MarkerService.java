@@ -6,7 +6,7 @@ import com.webproject.flarepoint.model.common.Id;
 import com.webproject.flarepoint.model.common.Tag;
 import com.webproject.flarepoint.model.liked.Liked;
 import com.webproject.flarepoint.model.marker.Marker;
-import com.webproject.flarepoint.model.user.Fisher;
+import com.webproject.flarepoint.model.user.User;
 import com.webproject.flarepoint.repository.LikedRepository;
 import com.webproject.flarepoint.repository.MarkerRepository;
 import com.webproject.flarepoint.repository.TagRepository;
@@ -31,14 +31,14 @@ public class MarkerService {
 
   //-----------------------------------------------------------------
   @Transactional
-  public Marker createMarker(Id<Fisher,Long> fisherId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
-                           String tagString, String description) {
+  public Marker createMarker(Id<User,Long> userId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
+                             String tagString, String description) {
 
-    checkArgument(fisherId != null, "fisherId must be provided.");
+    checkArgument(userId != null, "userId must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
 
-    Marker marker = new Marker(fisherId.value(),name,latitude,longitude,place_addr,isPrivate,trimTagString(tagString),description);
+    Marker marker = new Marker(userId.value(),name,latitude,longitude,place_addr,isPrivate,trimTagString(tagString),description);
 
     addTags(tagString);
 
@@ -46,11 +46,11 @@ public class MarkerService {
   }
 
   @Transactional
-  public Marker updateMarker(Id<Fisher,Long> fisherId, Long markerId, Long mfId, String name, String latitude, String longitude, String place_addr,
-                                     Boolean isPrivate, String tagString, String description) {
+  public Marker updateMarker(Id<User,Long> userId, Long markerId, Long mfId, String name, String latitude, String longitude, String place_addr,
+                             Boolean isPrivate, String tagString, String description) {
 
     try {
-      checkArgument(Objects.equals(mfId, fisherId.value()), "you can't update this marker.");
+      checkArgument(Objects.equals(mfId, userId.value()), "you can't update this marker.");
     } catch (Exception e) {
       throw new UnauthorizedException("auth failed.");
     }
@@ -72,9 +72,9 @@ public class MarkerService {
   }
 
   @Transactional
-  public void deleteMarker(Id<Fisher, Long> fisherId, Long markerId, Long mfId) {
+  public void deleteMarker(Id<User, Long> userId, Long markerId, Long mfId) {
     try {
-      checkArgument(Objects.equals(mfId, fisherId.value()) || fisherId.value() == 1, "you can't delete this marker.");
+      checkArgument(Objects.equals(mfId, userId.value()) || userId.value() == 1, "you can't delete this marker.");
     } catch (Exception e) {
       throw new UnauthorizedException("you can't delete this marker.");
     }
@@ -85,11 +85,11 @@ public class MarkerService {
   }
 
   @Transactional
-  public List<Marker> myMarkers(Id<Fisher, Long> fisherId) {
+  public List<Marker> myMarkers(Id<User, Long> userId) {
     List<Marker> result = new ArrayList<Marker>();
     List<Marker> all = getAll();
     all.forEach((marker) -> {
-      if (Objects.equals(marker.getFisherId(), fisherId.value())){
+      if (Objects.equals(marker.getUserId(), userId.value())){
         result.add(marker);
       }
     });

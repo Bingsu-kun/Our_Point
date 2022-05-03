@@ -18,9 +18,9 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 @ToString
 @Builder
 @NoArgsConstructor
-@Entity(name = "fisher")
-@Table(uniqueConstraints = { @UniqueConstraint(name = "unq_fisher_email_and_username", columnNames = {"email","fisher_name"})})
-public class Fisher {
+@Entity(name = "users")
+@Table(uniqueConstraints = { @UniqueConstraint(name = "unq_user_email_and_username", columnNames = {"email","user_name"})})
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_seq")
@@ -36,8 +36,8 @@ public class Fisher {
     @Column(nullable = false)
     private String profImageName;
 
-    @Column(name = "fisher_name", nullable = false)
-    private String fisherName;
+    @Column(name = "user_name", nullable = false)
+    private String userName;
 
     @Column(nullable = false)
     private String role;
@@ -46,22 +46,22 @@ public class Fisher {
 
     private LocalDateTime createdAt;
 
-    public Fisher(String email, String password, String profImageName, String fisherName, String role) {
-        this(null, email, password, profImageName, fisherName, role, null, now());
+    public User(String email, String password, String profImageName, String userName, String role) {
+        this(null, email, password, profImageName, userName, role, null, now());
     }
 
     //validation check
-    public Fisher(Long id, String email, String password, String profImageName, String fisherName, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
+    public User(Long id, String email, String password, String profImageName, String userName, String role, LocalDateTime lastLoginAt, LocalDateTime createdAt) {
         checkArgument(email != null, "email must be provided.");
         checkArgument(password != null, "password must be provided.");
-        checkArgument(fisherName != null, "username must be provided.");
+        checkArgument(userName != null, "username must be provided.");
 
 
         this.id = id;
         this.email = email;
         this.password = password;
         this.profImageName = profImageName;
-        this.fisherName = fisherName;
+        this.userName = userName;
         this.role = role;
         this.lastLoginAt = lastLoginAt;
         this.createdAt = defaultIfNull(createdAt, now());
@@ -74,7 +74,7 @@ public class Fisher {
 
     public void setProfImageName(String profImageName) { this.profImageName = profImageName; }
     //유저 닉네임(name) 변경
-    public void setFisherName(String fisherName) { this.fisherName = fisherName; }
+    public void setUserName(String userName) { this.userName = userName; }
     //유저 password 변경
     public void setPassword(String password) { this.password = password; }
 
@@ -102,12 +102,12 @@ public class Fisher {
 
     //Token making method
     public String newApiToken(Jwt jwt, String[] roles) {
-        Jwt.Claims claims = Jwt.Claims.of(id, fisherName, email, roles);
+        Jwt.Claims claims = Jwt.Claims.of(id, userName, email, roles);
         return jwt.newAccessToken(claims);
     }
 
     public String newRefreshToken(Jwt jwt, String[] roles) {
-        Jwt.Claims claims = Jwt.Claims.of(id, fisherName, email, roles);
+        Jwt.Claims claims = Jwt.Claims.of(id, userName, email, roles);
         return jwt.newRefreshToken(claims);
     }
 }

@@ -16,8 +16,8 @@
 #### 주요 개발 환경
 
 - Spring Boot (Java11)
-maven을 활용하여 API와 레포지토리에 따라 Fisher, Marker, Like로 나누어 구성했습니다.
-Fisher와 Marker는 각각의 레포지토리와 Service, Controller가 존재하고, Like는 레포지토리만 존재하며 비즈니스 로직적인 부분은 Marker Service에 포함했습니다.
+maven을 활용하여 API와 레포지토리에 따라 User, Marker, Like로 나누어 구성했습니다.
+User와 Marker는 각각의 레포지토리와 Service, Controller가 존재하고, Like는 레포지토리만 존재하며 비즈니스 로직적인 부분은 Marker Service에 포함했습니다.
 Spring Security와 JWT를 이용하여 인증/인가 구현했습니다
 
 - Library: JWT, Spring Security, JPA, Guava

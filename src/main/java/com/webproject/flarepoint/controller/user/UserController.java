@@ -1,12 +1,12 @@
-package com.webproject.flarepoint.controller.fisher;
+package com.webproject.flarepoint.controller.user;
 
 import com.webproject.flarepoint.controller.ApiResult;
 import com.webproject.flarepoint.errors.NotFoundException;
 import com.webproject.flarepoint.errors.UnauthorizedException;
 import com.webproject.flarepoint.model.common.Id;
-import com.webproject.flarepoint.model.user.Fisher;
+import com.webproject.flarepoint.model.user.User;
 import com.webproject.flarepoint.security.*;
-import com.webproject.flarepoint.service.FisherService;
+import com.webproject.flarepoint.service.UserService;
 import com.webproject.flarepoint.utils.RedisUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,20 +26,20 @@ import static com.webproject.flarepoint.utils.EmailFormatValidation.checkAddress
 
 @CrossOrigin(origins = { "http://localhost:8080","https://localhost:8080","https://flarepoint.netlify.app" })
 @RestController
-@RequestMapping("/fisher")
-public class FisherController {
+@RequestMapping("/user")
+public class UserController {
 
   private final Jwt jwt;
 
-  private final FisherService fisherService;
+  private final UserService userService;
 
   private final AuthenticationManager authenticationManager;
 
   private final RedisUtil redisUtil;
 
-  public FisherController(Jwt jwt, FisherService fisherService, AuthenticationManager authenticationManager, RedisUtil redisUtil) {
+  public UserController(Jwt jwt, UserService userService, AuthenticationManager authenticationManager, RedisUtil redisUtil) {
     this.jwt = jwt;
-    this.fisherService = fisherService;
+    this.userService = userService;
     this.authenticationManager = authenticationManager;
     this.redisUtil = redisUtil;
   }
@@ -47,27 +47,27 @@ public class FisherController {
   @PostMapping(path = "/join")
   public ApiResult<JoinResult> join(@RequestBody JoinRequest joinRequest, HttpServletResponse res) {
 
-    Fisher fisher = fisherService.join(
+    User user = userService.join(
             joinRequest.getPrincipal(),
             joinRequest.getCredentials(),
             joinRequest.getProfImageName(),
             joinRequest.getName()
     );
-    String apiToken = fisher.newApiToken(jwt, new String[]{fisher.getRole()});
-    String refreshToken = fisher.newRefreshToken(jwt, new String[]{fisher.getRole()});
-    redisUtil.setData(fisher.getFisherName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+    String apiToken = user.newApiToken(jwt, new String[]{user.getRole()});
+    String refreshToken = user.newRefreshToken(jwt, new String[]{user.getRole()});
+    redisUtil.setData(user.getUserName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
     Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
     refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
     refreshCookie.setHttpOnly(true);
     res.addCookie(refreshCookie);
-    return OK( new JoinResult(apiToken, new FisherDto(fisher)));
+    return OK( new JoinResult(apiToken, new UserDto(user)));
   }
 
   @PostMapping(path = "/join/email/exists")
   public ApiResult<?> checkEmailExists(@RequestBody ExistRequest existRequest) {
     String request = existRequest.getReq();
 
-    if (fisherService.findByEmail(request).isPresent())
+    if (userService.findByEmail(request).isPresent())
       return ERROR("이메일 중복",HttpStatus.CONFLICT);
     else if (!checkAddress(request))
       return ERROR("이메일 형식 오류",HttpStatus.BAD_REQUEST);
@@ -79,7 +79,7 @@ public class FisherController {
   public ApiResult<?> checkNameExists(@RequestBody ExistRequest existRequest) {
     String request = existRequest.getReq();
 
-    if (fisherService.findByName(request).isPresent())
+    if (userService.findByName(request).isPresent())
       return ERROR("닉네임 중복",HttpStatus.CONFLICT);
     else if (request.length() < 2 || request.length() > 10)
       return ERROR("닉네임 길이 오류",HttpStatus.BAD_REQUEST);
@@ -96,8 +96,8 @@ public class FisherController {
 
       AuthenticationResult result = (AuthenticationResult) authentication.getDetails();
 
-      String refreshToken = result.getFisher().newRefreshToken(jwt, new String[]{result.getFisher().getRole()});
-      redisUtil.setData(result.getFisher().getFisherName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
+      String refreshToken = result.getUser().newRefreshToken(jwt, new String[]{result.getUser().getRole()});
+      redisUtil.setData(result.getUser().getUserName(), refreshToken, jwt.getExpirySeconds() * 1_000L * 24 * 21);
       Cookie refreshCookie = createCookie(Jwt.REFRESH_TOKEN_NAME, refreshToken);
       refreshCookie.setMaxAge(jwt.getExpirySeconds() * 1_000 * 24 * 21);
       refreshCookie.setHttpOnly(true);
@@ -109,41 +109,41 @@ public class FisherController {
   }
 
   @GetMapping(path = "/me")
-  public ApiResult<FisherDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
-    Fisher fisher = fisherService.findById(authentication.id).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
-    return  OK(new FisherDto(fisher));
+  public ApiResult<UserDto> me(@AuthenticationPrincipal JwtAuthentication authentication) {
+    User user = userService.findById(authentication.id).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
+    return  OK(new UserDto(user));
   }
 
   @PutMapping(path = "/me/name/change")
-  public ApiResult<FisherDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+  public ApiResult<UserDto> changeName(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
     return OK(
-            new FisherDto(fisherService.changeName(authentication.id, changeRequest.getChangeValue()))
+            new UserDto(userService.changeName(authentication.id, changeRequest.getChangeValue()))
     );
   }
 
   @PutMapping(path = "/role/change")
-  public ApiResult<FisherDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+  public ApiResult<UserDto> changeRole(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
     return OK(
-            new FisherDto(fisherService.changeRole(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+            new UserDto(userService.changeRole(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
     );
   }
 
   @PutMapping(path = "/me/password/change")
-  public ApiResult<FisherDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
+  public ApiResult<UserDto> changePassword(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody ChangeRequest changeRequest) {
     return OK(
-            new FisherDto(fisherService.changePassword(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
+            new UserDto(userService.changePassword(authentication.id, changeRequest.getCredentials(), changeRequest.getChangeValue()))
     );
   }
 
   @DeleteMapping(path = "/me")
   public ApiResult<?> delete(@AuthenticationPrincipal JwtAuthentication authentication, @RequestBody AuthenticationRequest authRequest) {
-    fisherService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
+    userService.delete(authentication.id, authRequest.getPrincipal(), authRequest.getCredentials());
     return  OK("deleted");
   }
 
-  @GetMapping(path = "/{fisherId}")
-  public ApiResult<FisherDto> getFisher(@PathVariable(value = "fisherId", required = false) Long fisherId) {
-    return OK(new FisherDto(fisherService.findById(Id.of(Fisher.class, fisherId)).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."))));
+  @GetMapping(path = "/{userId}")
+  public ApiResult<UserDto> getUser(@PathVariable(value = "userId", required = false) Long userId) {
+    return OK(new UserDto(userService.findById(Id.of(User.class, userId)).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."))));
   }
 
 }
