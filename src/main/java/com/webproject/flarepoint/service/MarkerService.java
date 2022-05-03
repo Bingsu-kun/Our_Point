@@ -10,6 +10,7 @@ import com.webproject.flarepoint.model.user.User;
 import com.webproject.flarepoint.repository.LikedRepository;
 import com.webproject.flarepoint.repository.MarkerRepository;
 import com.webproject.flarepoint.repository.TagRepository;
+import com.webproject.flarepoint.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
@@ -19,11 +20,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Service
 public class MarkerService {
 
+  private final UserRepository userRepository;
   private final MarkerRepository markerRepository;
   private final LikedRepository likedRepository;
   private final TagRepository tagRepository;
 
-  public MarkerService(MarkerRepository markerRepository, LikedRepository likedRepository, TagRepository tagRepository) {
+  public MarkerService(UserRepository userRepository, MarkerRepository markerRepository, LikedRepository likedRepository, TagRepository tagRepository) {
+    this.userRepository = userRepository;
     this.markerRepository = markerRepository;
     this.likedRepository = likedRepository;
     this.tagRepository = tagRepository;
@@ -38,7 +41,7 @@ public class MarkerService {
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
 
-    Marker marker = new Marker(userId.value(),name,latitude,longitude,place_addr,isPrivate,trimTagString(tagString),description);
+    Marker marker = new Marker(userRepository.findById(userId.value()).orElseThrow(() -> new NotFoundException("user not exist.")),name,latitude,longitude,place_addr,isPrivate,trimTagString(tagString),description);
 
     addTags(tagString);
 
@@ -78,7 +81,7 @@ public class MarkerService {
     } catch (Exception e) {
       throw new UnauthorizedException("you can't delete this marker.");
     }
-    Marker currentMarker = markerRepository.getById(markerId);
+    Marker currentMarker = markerRepository.findById(markerId).orElseThrow(() -> new NotFoundException("marker not exist."));
     markerRepository.delete(currentMarker);
     decreaseTags(currentMarker.getTags());
     cascadeLikes(markerId);
@@ -89,7 +92,7 @@ public class MarkerService {
     List<Marker> result = new ArrayList<Marker>();
     List<Marker> all = getAll();
     all.forEach((marker) -> {
-      if (Objects.equals(marker.getUserId(), userId.value())){
+      if (Objects.equals(marker.getUser().getId(), userId.value())){
         result.add(marker);
       }
     });
@@ -118,19 +121,17 @@ public class MarkerService {
     return result.toString();
   }
 
-  @Transactional
   private void cascadeLikes(Long markerId) {
     List<Liked> likeds = likedRepository.findAll();
     if (!likeds.isEmpty()) {
       likeds.forEach((element) -> {
-        if (Objects.equals(element.getMarkerId(), markerId)) {
+        if (Objects.equals(element.getMarker().getMarkerId(), markerId)) {
           likedRepository.delete(element);
         }
       });
     }
   }
 
-  @Transactional
   private void addTags(String tagString) {
     for (String tag : trimTagString(tagString).replaceAll("#","").split(" ")) {
       Tag savedTag = tagRepository.findByTag(tag).orElse(new Tag(tag));
@@ -139,7 +140,6 @@ public class MarkerService {
     }
   }
 
-  @Transactional
   private void decreaseTags(String tagString) {
     for (String tag : trimTagString(tagString).replaceAll("#","").split(" ")) {
       Tag savedTag = tagRepository.findByTag(tag).orElseThrow(() -> new NotFoundException("찾을 수 없습니다."));
@@ -153,7 +153,6 @@ public class MarkerService {
     }
   }
 
-  @Transactional
   private void updateTags(String beforeTag, String afterTag) {
     String[] bTags = beforeTag.replaceAll("#", "").split(" ");
     String[] aTags = afterTag.replaceAll("#", "").split(" ");

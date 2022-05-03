@@ -1,6 +1,7 @@
 package com.webproject.flarepoint.model.marker;
 
 
+import com.webproject.flarepoint.model.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,8 +23,9 @@ public class Marker {
   @SequenceGenerator(name = "marker_id_seq", sequenceName = "marker_id_seq", allocationSize = 1)
   private Long markerId;
 
-  @Column(nullable = false)
-  private Long userId;
+  @ManyToOne
+  @JoinColumn(name = "User_Id")
+  private User user;
 
   private String name;
 
@@ -45,20 +47,20 @@ public class Marker {
 
   private LocalDateTime createdAt;
 
-  public Marker(Long userId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate, String tags, String description) {
-    this(null, userId,name,latitude,longitude,place_addr,isPrivate,tags,description,now());
+  public Marker(User user, String name, String latitude, String longitude, String place_addr, Boolean isPrivate, String tags, String description) {
+    this(null, user,name,latitude,longitude,place_addr,isPrivate,tags,description,now());
   }
 
-  public Marker(Long markerId, Long userId, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
+  public Marker(Long markerId, User user, String name, String latitude, String longitude, String place_addr, Boolean isPrivate,
                 String tags, String description, LocalDateTime createdAt) {
-    checkArgument(userId != null, "userId must be provided.");
+    checkArgument(user != null, "user must be provided.");
     checkArgument(latitude != null, "latitude must be provided.");
     checkArgument(longitude != null, "longitude must be provided.");
     checkArgument(isPrivate != null,"isPrivate must be provided.");
     checkArgument(description.length() <= 200, "description must be lower than 200");
 
     this.markerId = markerId;
-    this.userId = userId;
+    this.user = user;
     this.name = name;
     this.latitude = latitude;
     this.longitude = longitude;

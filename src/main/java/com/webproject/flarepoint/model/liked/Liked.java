@@ -1,5 +1,7 @@
 package com.webproject.flarepoint.model.liked;
 
+import com.webproject.flarepoint.model.marker.Marker;
+import com.webproject.flarepoint.model.user.User;
 import lombok.*;
 
 import javax.persistence.*;
@@ -17,23 +19,25 @@ public class Liked {
   @SequenceGenerator(name = "liked_id_seq", sequenceName = "liked_id_seq", allocationSize = 1)
   private Long seq;
 
-  @Column(nullable = false)
-  private Long userId;
+  @ManyToOne
+  @JoinColumn(name = "User_Id")
+  private User user;
 
-  @Column(nullable = false)
-  private Long markerId;
+  @ManyToOne
+  @JoinColumn(name = "Marker_MarkerId")
+  private Marker marker;
 
   @Column(nullable = false)
   private Long mfId;
 
-  public Liked(Long userId, Long markerId, Long mfId) {
-    this(null, userId, markerId, mfId);
+  public Liked(User user, Marker marker, Long mfId) {
+    this(null, user, marker, mfId);
   }
 
-  public Liked(Long seq, Long userId, Long markerId, Long mfId) {
+  public Liked(Long seq, User user, Marker marker, Long mfId) {
     this.seq = seq;
-    this.userId = userId;
-    this.markerId = markerId;
+    this.user = user;
+    this.marker = marker;
     this.mfId = mfId;
   }
 

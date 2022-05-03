@@ -211,7 +211,7 @@ public class UserService {
     private void cascadeMarkers(Id<User,Long> id) {
       List<Marker> markers = markerRepository.findAll();
       markers.forEach((element) -> {
-        if (Objects.equals(element.getUserId(), id.value())) {
+        if (Objects.equals(element.getUser().getId(), id.value())) {
           markerRepository.delete(element);
         }
       });
@@ -220,7 +220,7 @@ public class UserService {
     private void cascadeLikes(Id<User,Long> id) {
       List<Liked> likeds = likedRepository.findAll();
       likeds.forEach((element) -> {
-        if (Objects.equals(element.getUserId(),id.value()) || Objects.equals(element.getMfId(),id.value())) {
+        if (Objects.equals(element.getUser().getId(),id.value()) || Objects.equals(element.getMfId(),id.value())) {
           likedRepository.delete(element);
         }
       });

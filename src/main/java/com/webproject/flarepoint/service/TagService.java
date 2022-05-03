@@ -17,7 +17,7 @@ public class TagService {
   }
 
   public List<Tag> getTopTags(int count) {
-    List<Tag> topTags = tagRepository.topTags();
+    List<Tag> topTags = tagRepository.findAllByOrderByUsedDesc();
     List<Tag> returnList = new ArrayList<>();
     int rank = Math.min(topTags.size(), count);
     for (int i = 0; i < rank; i++) {
